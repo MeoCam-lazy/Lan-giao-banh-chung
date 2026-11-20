@@ -83,10 +83,12 @@ const streetsZ = place.city?.streets?.z || [0];
 scatterTetDecor(scene, streetsX, streetsZ);
 
 const lots = place.city?.lots || [];
-const homeSpot = place.openSpot({ near: new THREE.Vector3(0, 0, 0) });
-const HOME_POS = { x: homeSpot.x, z: homeSpot.z };
-const BIKE_START = place.openSpot({ near: new THREE.Vector3(homeSpot.x + 3.8, 0, homeSpot.z + 2.0) });
-const MOM_POS = place.openSpot({ near: new THREE.Vector3(homeSpot.x - 3.5, 0, homeSpot.z - 2.5) });
+// Chọn 1 căn nhà thật làm Nhà Lan & Bếp Mẹ: đặt hẳn trên VỈA HÈ (lot.door), tránh xa lòng đường Taxi!
+const homeLot = lots.find((l) => Math.hypot(l.door[0], l.door[1]) < 28) || lots[0] || { door: [0, -5], facing: 0 };
+const MOM_POS = { x: homeLot.door[0], z: homeLot.door[1] };
+const sideDir = Math.abs(Math.sin(homeLot.facing || 0)) > 0.5 ? [0, 1] : [1, 0];
+const HOME_POS = { x: MOM_POS.x + sideDir[0] * 2.5, z: MOM_POS.z + sideDir[1] * 2.5 };
+const BIKE_START = { x: MOM_POS.x - sideDir[0] * 2.8, z: MOM_POS.z - sideDir[1] * 2.8 };
 
 // Nồi Bánh Chưng & Nhân vật Mẹ đứng ở nhà đưa bánh cho Lan (bỏ cổng chào cho thoáng)
 const fireworks = createFireworkSystem(scene);
@@ -117,7 +119,7 @@ const TEACHERS = RELATIVES.map((t, i) => {
   return { id: i, ...t, dropX: lot.door[0], dropZ: lot.door[1] };
 });
 
-const shopRing = new THREE.Mesh(new THREE.RingGeometry(2.5, 3.2, 32), new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
+const shopRing = new THREE.Mesh(new THREE.RingGeometry(1.7, 2.25, 32), new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
 shopRing.rotation.x = -Math.PI / 2;
 shopRing.position.set(MOM_POS.x, 0.08, MOM_POS.z);
 const bikeRing = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.5, 24), new THREE.MeshBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
