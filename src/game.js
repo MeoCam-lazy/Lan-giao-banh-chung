@@ -76,7 +76,7 @@ container.appendChild(renderer.domElement);
 
 // Bầu trời Đêm 30 Tết trước Giao Thừa: cửa sổ, đèn đường & đèn lồng rực sáng!
 const look = stage(renderer, scene, { time: 'dusk' });
-const place = await buildKit({ folder: './assets/', city: { seed: 2026, blocks: [3, 2] }, people: 'idle', night: true });
+const place = await buildKit({ folder: './assets/', city: { seed: 2026, blocks: [3, 2] }, people: 'idle', night: true, skip: ['tiled-roof-section'] });
 scene.add(place.group);
 look.ground(place);
 look.shadows(place.group);

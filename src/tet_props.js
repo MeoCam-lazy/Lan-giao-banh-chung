@@ -178,8 +178,13 @@ export function scatterTetDecor(scene, streetsX, streetsZ, place) {
         }
       });
 
-      // Dây đèn lồng đỏ giăng cao 4.4m ngang qua đường
-      if (x % 28 === 0) {
+      // Dây đèn lồng đỏ giăng ngang qua đường: BẮT BUỘC có 2 cột gỗ cắm chắc ở cả 2 đầu vỉa hè!
+      if (x % 28 === 0 && isSidewalk(x, sz - 4.8) && isSidewalk(x, sz + 4.8)) {
+        [-4.8, 4.8].forEach((endZ) => {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 4.5, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+          post.position.set(x, 2.25, sz + endZ);
+          scene.add(post);
+        });
         const wire = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 9.6), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
         wire.position.set(x, 4.4, sz);
         scene.add(wire);
