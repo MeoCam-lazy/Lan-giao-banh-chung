@@ -6,7 +6,9 @@ import { stage } from '../assets/stage.mjs';
 import { animate as animateHumanoid } from '../assets/clips.mjs';
 import { createAsset as createBicycle } from '../assets/city-bicycle.mjs';
 import { createAsset as createStudent } from '../assets/student-character.mjs';
-import { createAsset as createSalaryman } from '../assets/salaryman-character.mjs';
+import { createAsset as createCafeCustomer } from '../assets/cafe-customer.mjs';
+import { createAsset as createSuburbanResident } from '../assets/suburban-resident.mjs';
+import { createAsset as createTouchlineManager } from '../assets/touchline-manager.mjs';
 import { createAsset as createTaxi } from '../assets/city-taxi.mjs';
 import { createAsset as createVan } from '../assets/kei-van.mjs';
 
@@ -116,8 +118,7 @@ function poseStandingRelaxed(npc, wave = 0) {
 // Nồi Bánh Chưng đặt lệch sang bên trong cạnh Mẹ (không chắn đường Lan chạy ra Xe Đạp)
 const fireworks = createFireworkSystem(scene);
 scene.add(createBanhChungPot(MOM_POS.x - sideDir[0] * 1.9, MOM_POS.z - sideDir[1] * 1.9));
-const momNpc = createStudent({ bag: 'none' });
-momNpc.scale.setScalar(1.06);
+const momNpc = createCafeCustomer({ figure: 'feminine', age: 'adult', expression: 'warm', coat: '#e11d48', shirt: '#fef08a' });
 momNpc.position.set(MOM_POS.x - sideDir[0] * 0.4, 0, MOM_POS.z - sideDir[1] * 0.4);
 momNpc.rotation.set(0, Math.atan2(HOME_POS.x - momNpc.position.x, HOME_POS.z - momNpc.position.z), 0);
 animateHumanoid(momNpc).then((a) => { if (a?.mixer) a.mixer.stopAllAction(); poseStandingRelaxed(momNpc); }).catch(() => {});
@@ -166,17 +167,24 @@ const houseMarkers = TEACHERS.map((t) => {
   pad.position.set(t.dropX, 0.08, t.dropZ);
   pad.visible = false;
 
-  const npc = t.isMale ? createSalaryman() : createStudent({ bag: 'none' });
-  if (!t.isMale) {
-    npc.scale.setScalar(t.id === 0 ? 0.98 : 1.06);
-    if (t.id === 0) {
-      // Bà Ngoại: thêm búi tóc bạc trắng & gậy chống cho ra dáng Bà Ngoại!
-      const bun = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
-      bun.position.set(0, 1.52, -0.18);
-      const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.95, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
-      cane.position.set(0.32, 0.48, 0.15);
-      npc.add(bun, cane);
-    }
+  let npc;
+  if (t.id === 0) {
+    // Bà Ngoại (Suburban Resident tuổi 'old', áo đỏ đô + búi tóc bạc + gậy chống)
+    npc = createSuburbanResident({ figure: 'feminine', age: 'old', expression: 'warm', shirt: '#9f1239', undershirt: '#fef3c7' });
+    const bun = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+    bun.position.set(0, 1.52, -0.18);
+    const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.95, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+    cane.position.set(0.32, 0.48, 0.15);
+    npc.add(bun, cane);
+  } else if (t.id === 1) {
+    // Bác Hai (Touchline Manager tuổi 'old', áo khoác nâu lịch sự)
+    npc = createTouchlineManager({ figure: 'masculine', age: 'old', coat: '#92400e', shirt: '#fef3c7' });
+  } else if (t.id === 2) {
+    // Cô Ba (Cafe Customer nữ trưởng thành, áo khoác hồng đào)
+    npc = createCafeCustomer({ figure: 'feminine', age: 'adult', expression: 'warm', coat: '#f43f5e', shirt: '#fffbeb' });
+  } else {
+    // Cậu Tư (Suburban Resident nam trưởng thành, sơ mi xanh dương)
+    npc = createSuburbanResident({ figure: 'masculine', age: 'adult', expression: 'warm', shirt: '#0284c7', denim: '#1e293b' });
   }
   npc.position.set(t.dropX, 0, t.dropZ);
   npc.lookAt(MOM_POS.x, 0, MOM_POS.z);
