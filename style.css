@@ -161,3 +161,20 @@ body { overflow: hidden; background: #0f172a; font-family: 'Segoe UI', system-ui
   display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #fde68a;
 }
 .title-corner-hint b { color: #facc15; margin-right: 6px; }
+
+.ending-banner {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  background: rgba(15, 7, 11, 0.85);
+  border: 2px solid #facc15;
+  color: #fef08a;
+  font-size: 20px;
+  font-weight: 900;
+  padding: 12px 28px;
+  border-radius: 99px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}

@@ -29,6 +29,8 @@ const state = {
   deliveredIds: new Set(), // Đánh dấu 4 nhà đã biếu đủ
   returningHome: false,    // Đã biếu đủ 4 nhà -> Đạp xe về nhà đón Giao Thừa!
   fireworkTimer: 0,
+  endingTimer: 0,
+  endingMode: 'OUTSIDE',
   nextUpgradeAt: 2,
   combo: 1,
   maxCombo: 1,
@@ -61,6 +63,7 @@ const scoreEl = document.getElementById('score-display');
 const highScoreEl = document.getElementById('high-score');
 const comboEl = document.getElementById('combo-display');
 const toastEl = document.getElementById('toast');
+const endingBannerEl = document.getElementById('ending-banner');
 const mmCtx = document.getElementById('minimap').getContext('2d');
 
 const scene = new THREE.Scene();
@@ -324,35 +327,52 @@ function openUpgradeMenu() {
   upgradeScreen.classList.remove('hidden');
 }
 
-function endGame(mode = 'OUTSIDE') {
-  // mode: 'HAPPY' (Về nhà kịp 00:00) | 'OUTSIDE' (Xem pháo hoa ngoài đường) | 'CRASH' (Tai nạn)
+function showGameOverModal() {
   state.phase = 'GAMEOVER';
-  sfx.stopBGM();
-  if (mode !== 'CRASH') {
-    state.fireworkTimer = 6.0;
-    for (let i = 0; i < 4; i++) setTimeout(() => { fireworks.launch(playerRoot.position.x, playerRoot.position.z); sfx.playFirework(); }, i * 550);
-  }
-  if (state.score > state.highScore) { state.highScore = state.score; localStorage.setItem(HS_KEY, String(state.highScore)); }
-  hud.classList.add('hidden');
+  endingBannerEl.classList.add('hidden');
   gameoverScreen.classList.remove('hidden');
-
   const badgeEl = document.getElementById('go-badge');
   const titleEl = document.getElementById('go-title');
-  if (mode === 'CRASH') {
-    badgeEl.textContent = '💥 TAI NẠN ĐÊM 30 TẾT!';
-    titleEl.textContent = 'BỊ XE ĐỤNG RỒI — R.I.P! 💀';
-  } else if (mode === 'HAPPY') {
+  if (state.endingMode === 'HAPPY') {
     badgeEl.textContent = '🎆 00:00 — HAPPY ENDING CÙNG GIA ĐÌNH!';
     titleEl.textContent = 'KỊP VỀ NHÀ ĐÓN GIAO THỪA VỚI MẸ! ❤️';
   } else {
     badgeEl.textContent = '🎇 00:00 RỒI — HẾT GIỜ GIAO THỪA!';
     titleEl.textContent = 'LAN XEM PHÁO HOA MỘT MÌNH NGOÀI ĐƯỜNG!';
   }
-
   document.getElementById('final-score').textContent = state.score;
   document.getElementById('final-best').textContent = state.highScore;
   document.getElementById('final-delivered').textContent = `${state.deliveredIds.size}/4`;
   document.getElementById('final-combo').textContent = `x${state.maxCombo}`;
+}
+
+function endGame(mode = 'OUTSIDE') {
+  // Chuyển sang pha ENDING (4.5s ngước camera lên trời ngắm Pháo Hoa 3D trước khi hiện bảng tổng kết)
+  state.phase = 'ENDING';
+  state.endingMode = mode;
+  state.endingTimer = 4.6;
+  state.fireworkTimer = 10.0;
+  sfx.stopBGM();
+  if (state.score > state.highScore) { state.highScore = state.score; localStorage.setItem(HS_KEY, String(state.highScore)); }
+  hud.classList.add('hidden');
+
+  if (mode === 'HAPPY') {
+    // Đặt Lan đứng cạnh Mẹ trước sân nhà cùng ngước xem pháo hoa
+    playerRoot.position.set(MOM_POS.x + 1.2, 0, MOM_POS.z + 1.2);
+    playerRoot.rotation.y = Math.PI;
+    momNpc.lookAt(MOM_POS.x, 10, MOM_POS.z - 20);
+    endingBannerEl.textContent = '🎆 00:00 — LAN ĐÓN GIAO THỪA & XEM PHÁO HOA CÙNG MẸ! ❤️';
+  } else {
+    endingBannerEl.textContent = '🎇 00:00 RỒI — LAN XEM PHÁO HOA MỘT MÌNH NGOÀI ĐƯỜNG...';
+  }
+  endingBannerEl.classList.remove('hidden');
+
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      fireworks.launch(playerRoot.position.x, playerRoot.position.z - 14);
+      sfx.playFirework();
+    }, i * 550);
+  }
   updateUI();
 }
 
@@ -386,6 +406,7 @@ function startOrReset(climax = false) {
   startScreen.classList.add('hidden');
   upgradeScreen.classList.add('hidden');
   gameoverScreen.classList.add('hidden');
+  endingBannerEl.classList.add('hidden');
   hud.classList.remove('hidden');
   sfx.startBGM(() => state.timeLeft < 25 || state.lionBuff > 0);
   showToast(climax ? '⚡ 23:58 RỒI! SẮP ĐẾN GIAO THỪA!' : '🏃 Mẹ hối rồi! Từ nhà ra lấy Xe Đạp Đỏ mau!');
@@ -527,7 +548,12 @@ function animate(now) {
   fireworks.update(dt);
   if (state.fireworkTimer > 0) {
     state.fireworkTimer -= dt;
-    if (Math.random() < 0.04) { fireworks.launch(playerRoot.position.x, playerRoot.position.z); sfx.playFirework(); }
+    if (Math.random() < 0.05) { fireworks.launch(playerRoot.position.x, playerRoot.position.z - 14); sfx.playFirework(); }
+  }
+
+  if (state.phase === 'ENDING') {
+    state.endingTimer -= dt;
+    if (state.endingTimer <= 0) showGameOverModal();
   }
 
   if (state.phase === 'PLAYING') {
@@ -668,11 +694,15 @@ function animate(now) {
   state.trauma = Math.max(0, state.trauma - 2.2 * dt);
   const shake = state.trauma * state.trauma * 1.1;
 
-  // Camera Cinematic quay vòng chậm quanh Phố Tết khi ở màn hình Start
+  // Camera Cinematic quay vòng chậm khi ở Start; ngước lên trời xem Pháo Hoa khi Ending; bám sau lưng khi chơi
   if (state.phase === 'START') {
     const orbit = now * 0.00025;
     camera.position.set(MOM_POS.x + Math.sin(orbit) * 20, 10.5, MOM_POS.z + Math.cos(orbit) * 20);
     camera.lookAt(MOM_POS.x, 1.5, MOM_POS.z);
+  } else if (state.phase === 'ENDING' || state.phase === 'GAMEOVER') {
+    const camPos = new THREE.Vector3(playerRoot.position.x + 2.5, 2.4, playerRoot.position.z + 6.5);
+    camera.position.lerp(camPos, 3.5 * dt);
+    camera.lookAt(playerRoot.position.x, 11.5, playerRoot.position.z - 14);
   } else {
     let yawDiff = playerRoot.rotation.y - smoothCamYaw;
     while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
@@ -687,7 +717,7 @@ function animate(now) {
 
   const proj = new THREE.Vector3();
   labelNodes.forEach((ln) => {
-    if (state.phase === 'START' || (ln.id === -2 && state.riding)) { ln.el.style.display = 'none'; return; }
+    if (state.phase === 'START' || state.phase === 'ENDING' || state.phase === 'GAMEOVER' || (ln.id === -2 && state.riding)) { ln.el.style.display = 'none'; return; }
     proj.set(ln.x, ln.y, ln.z).project(camera);
     if (proj.z > 1) { ln.el.style.display = 'none'; return; }
     ln.el.style.display = 'block';
