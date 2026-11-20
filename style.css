@@ -203,3 +203,24 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   white-space: nowrap;
 }
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #0f070b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loading-box {
+  padding: 18px 34px;
+  border: 2px solid #facc15;
+  border-radius: 4px;
+  background: rgba(24, 14, 20, 0.95);
+  color: #fde047;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 6px 6px 0 #7f1d1d;
+}

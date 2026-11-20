@@ -78,14 +78,22 @@ container.appendChild(renderer.domElement);
 
 // Bầu trời Đêm 30 Tết trước Giao Thừa: cửa sổ, đèn đường & đèn lồng rực sáng!
 const look = stage(renderer, scene, { time: 'dusk' });
-const place = await buildKit({ folder: './assets/', city: { seed: 2026, blocks: [3, 2] }, people: 'idle', night: true, skip: ['tiled-roof-section'] });
+// Giữ riêng city-taxi & kei-van trong kit để có thể hất bay luôn cả xe đậu ven đường!
+const place = await buildKit({
+  folder: './assets/',
+  city: { seed: 2026, blocks: [3, 2] },
+  people: 'idle',
+  night: true,
+  keep: ['city-taxi', 'kei-van'],
+  skip: ['tiled-roof-section'],
+});
 scene.add(place.group);
 look.ground(place);
 look.shadows(place.group);
+document.getElementById('loading-screen')?.classList.add('hidden');
 
 const streetsX = place.city?.streets?.x || [0];
 const streetsZ = place.city?.streets?.z || [0];
-scatterTetDecor(scene, streetsX, streetsZ, place);
 
 const lots = place.city?.lots || [];
 // Chọn 1 căn nhà thật làm Nhà Lan & Bếp Mẹ: đặt hẳn trên VỈA HÈ (lot.door), tránh xa lòng đường Taxi!
@@ -123,7 +131,7 @@ momNpc.position.set(MOM_POS.x - sideDir[0] * 0.4, 0, MOM_POS.z - sideDir[1] * 0.
 momNpc.rotation.set(0, Math.atan2(HOME_POS.x - momNpc.position.x, HOME_POS.z - momNpc.position.z), 0);
 animateHumanoid(momNpc).then((a) => { if (a?.mixer) a.mixer.stopAllAction(); poseStandingRelaxed(momNpc); }).catch(() => {});
 const momFlag = createVietnamFlag();
-momFlag.position.set(MOM_POS.x - sideDir[0] * 2.5, 0, MOM_POS.z - sideDir[1] * 2.5);
+momFlag.position.set(MOM_POS.x - sideDir[0] * 3.1, 0, MOM_POS.z - sideDir[1] * 3.1);
 momFlag.rotation.y = homeLot.facing ?? 0;
 scene.add(momNpc, momFlag);
 
@@ -147,6 +155,14 @@ const TEACHERS = RELATIVES.map((t, i) => {
   const lot = chosenLots[i] || { door: [(i % 2 === 0 ? -24 : 24), (i < 2 ? -18 : 18)] };
   return { id: i, ...t, dropX: lot.door[0], dropZ: lot.door[1] };
 });
+
+// Trang trí phố sau khi đã chốt vị trí Bếp Mẹ & 4 Nhà Họ Hàng để không bị trùng chậu hoa!
+scatterTetDecor(scene, streetsX, streetsZ, place, [
+  MOM_POS,
+  HOME_POS,
+  BIKE_START,
+  ...TEACHERS.map((t) => ({ x: t.dropX, z: t.dropZ })),
+]);
 
 const shopRing = new THREE.Mesh(new THREE.RingGeometry(1.7, 2.25, 32), new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
 shopRing.rotation.x = -Math.PI / 2;
@@ -261,28 +277,7 @@ for (let i = 0; i < 3; i++) {
 stunHalo.visible = false;
 tiltGroup.add(stunHalo);
 
-// Tóc Siêu Xayda vàng dựng ngược gắn trực tiếp vào tiltGroup trên đỉnh đầu Lan (không bị lọt vào đầu!)
-const saiyanHair = new THREE.Group();
-const hairMat = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfacc15, emissiveIntensity: 1.0 });
-[
-  [0, 0.25, 0, -0.2, 0, 0.65],
-  [0.2, 0.2, 0.05, 0.2, -0.5, 0.52],
-  [-0.2, 0.2, 0.05, 0.2, 0.5, 0.52],
-  [0.16, 0.16, -0.15, -0.55, -0.4, 0.54],
-  [-0.16, 0.16, -0.15, -0.55, 0.4, 0.54],
-  [0, 0.14, -0.22, -0.75, 0, 0.5],
-  [0, 0.22, 0.16, 0.45, 0, 0.48],
-].forEach(([sx, sy, sz, rx, rz, h]) => {
-  const spike = new THREE.Mesh(new THREE.ConeGeometry(0.14, h, 5), hairMat);
-  spike.position.set(sx, sy, sz);
-  spike.rotation.set(rx, 0, rz);
-  saiyanHair.add(spike);
-});
-saiyanHair.position.set(0, 1.88, -0.1);
-saiyanHair.visible = false;
-tiltGroup.add(saiyanHair);
-
-// Vòng & Quả cầu + Tia lửa Aura Siêu Xayda vàng rực bao quanh Lan khi bật Trống Lân Hộ Thể!
+// Vòng & Quả cầu sáng opacity 0.28 bao quanh Lan khi bật Trống Lân Hộ Thể (bỏ tóc gai Siêu Xayda)
 const lionAura = new THREE.Group();
 const auraRing = new THREE.Mesh(
   new THREE.RingGeometry(1.5, 2.2, 24),
@@ -295,17 +290,6 @@ const auraSphere = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.28, depthWrite: false })
 );
 auraSphere.position.y = 1.05;
-const auraFlames = [];
-for (let i = 0; i < 6; i++) {
-  const a = (i / 6) * Math.PI * 2;
-  const flame = new THREE.Mesh(
-    new THREE.ConeGeometry(0.22, 1.35, 5),
-    new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xfde047 : 0xf97316, transparent: true, opacity: 0.72 })
-  );
-  flame.position.set(Math.cos(a) * 1.15, 0.75, Math.sin(a) * 1.15);
-  lionAura.add(flame);
-  auraFlames.push(flame);
-}
 lionAura.add(auraRing, auraSphere);
 lionAura.visible = false;
 playerRoot.add(lionAura);
@@ -318,6 +302,16 @@ arrowGroup.add(arrowCone);
 playerRoot.add(arrowGroup);
 playerRoot.position.set(HOME_POS.x, 0, HOME_POS.z);
 scene.add(playerRoot);
+
+// Xe đậu ven đường của kit (có thể hất bay khi bật Hào Quang Lân!)
+const parkedCars = [...place.of('city-taxi'), ...place.of('kei-van')].map((obj) => ({
+  mesh: obj,
+  origPos: obj.position.clone(),
+  origRot: obj.rotation.clone(),
+  fly: 0,
+  flyVx: 0,
+  flyVz: 0,
+}));
 
 // Giao thông Taxi & Kei Van (có thể bị húc bay lên trời!)
 const traffic = [];
@@ -526,6 +520,7 @@ function startOrReset(climax = false) {
   state.trauma = 0;
   state.perks = { kite: false, leaf: false, drum: false };
   traffic.forEach((c) => { c.fly = 0; c.mesh.position.y = 0; c.mesh.rotation.x = 0; });
+  parkedCars.forEach((p) => { p.fly = 0; p.mesh.position.copy(p.origPos); p.mesh.rotation.copy(p.origRot); });
 
   playerRoot.position.set(HOME_POS.x, 0, HOME_POS.z);
   // Quay mặt Lan và Camera hướng thẳng ra phía Xe Đạp / đường phố cho thoáng tầm nhìn!
@@ -724,12 +719,22 @@ function animate(now) {
     state.lionBuff = Math.max(0, state.lionBuff - dt);
     state.stunTimer = Math.max(0, state.stunTimer - dt);
     state.hitCooldown = Math.max(0, state.hitCooldown - dt);
+    parkedCars.forEach((p) => {
+      if (p.fly > 0) {
+        p.fly -= dt;
+        p.mesh.position.y = Math.sin((1 - p.fly) * Math.PI) * 12;
+        p.mesh.position.x += p.flyVx * dt;
+        p.mesh.position.z += p.flyVz * dt;
+        p.mesh.rotation.x += 9 * dt;
+        p.mesh.rotation.z += 5 * dt;
+        if (p.fly <= 0) { p.mesh.position.copy(p.origPos); p.mesh.rotation.copy(p.origRot); }
+      }
+    });
+
     lionAura.visible = state.lionBuff > 0;
-    saiyanHair.visible = state.lionBuff > 0;
     if (lionAura.visible) {
-      lionAura.rotation.y += 4.0 * dt;
-      auraSphere.scale.setScalar(1 + Math.sin(now * 0.012) * 0.08);
-      auraFlames.forEach((f, idx) => { f.scale.y = 0.85 + Math.sin(now * 0.018 + idx) * 0.35; });
+      lionAura.rotation.y += 3.5 * dt;
+      auraSphere.scale.setScalar(1 + Math.sin(now * 0.012) * 0.07);
     }
 
     stunHalo.visible = state.stunTimer > 0;
@@ -834,6 +839,25 @@ function animate(now) {
             if (state.delivered >= state.nextUpgradeAt) { state.nextUpgradeAt += 2; openUpgradeMenu(); }
           }
           break;
+        }
+      }
+
+      // Khi có Hào Quang Lân: hất bay luôn cả các xe đậu ven đường!
+      if (state.lionBuff > 0) {
+        for (const p of parkedCars) {
+          if (p.fly > 0) continue;
+          const d = Math.hypot(playerRoot.position.x - p.mesh.position.x, playerRoot.position.z - p.mesh.position.z);
+          if (d < 2.9) {
+            p.fly = 1.0;
+            const pushA = Math.atan2(p.mesh.position.z - playerRoot.position.z, p.mesh.position.x - playerRoot.position.x);
+            p.flyVx = Math.cos(pushA) * 20;
+            p.flyVz = Math.sin(pushA) * 20;
+            state.score += 100;
+            state.trauma = 0.4;
+            sfx.playLionDrum();
+            spawnEmojis(p.mesh.position.x, p.mesh.position.z, ['💥', '🚕', '🦁', '✨']);
+            showToast('🦁 HẤT BAY XE ĐẬU VEN ĐƯỜNG! +100đ!');
+          }
         }
       }
 

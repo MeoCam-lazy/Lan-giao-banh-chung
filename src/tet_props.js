@@ -138,14 +138,15 @@ export function createBanhChungPot(x, z) {
   return g;
 }
 
-// Trang trí Cây Nêu, Dây Đèn Lồng Đỏ & Chậu Mai/Đào: kiểm tra place.surfaceAt() để KHÔNG lệch ra lòng đường!
-export function scatterTetDecor(scene, streetsX, streetsZ, place) {
+// Trang trí Cây Nêu, Dây Đèn Lồng Đỏ & Chậu Mai/Đào: tránh xa Bếp Mẹ & Nhà Họ Hàng để không bị trùng!
+export function scatterTetDecor(scene, streetsX, streetsZ, place, reservedSpots = []) {
   const lanternMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: 0.75 });
   const capMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
   const bambooMat = new THREE.MeshStandardMaterial({ color: 0x65a30d });
   const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xbe123c, emissiveIntensity: 0.35 });
 
   const isSidewalk = (x, z) => {
+    if (reservedSpots.some((s) => Math.hypot(x - s.x, z - s.z) < 5.0)) return false;
     const surf = place?.surfaceAt ? place.surfaceAt(x, z) : '';
     return (!surf || !surf.includes('road')) && (!place?.blocked || !place.blocked(x, z, 0.6));
   };
