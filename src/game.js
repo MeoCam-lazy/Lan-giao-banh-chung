@@ -83,7 +83,7 @@ look.shadows(place.group);
 
 const streetsX = place.city?.streets?.x || [0];
 const streetsZ = place.city?.streets?.z || [0];
-scatterTetDecor(scene, streetsX, streetsZ);
+scatterTetDecor(scene, streetsX, streetsZ, place);
 
 const lots = place.city?.lots || [];
 // Chọn 1 căn nhà thật làm Nhà Lan & Bếp Mẹ: đặt hẳn trên VỈA HÈ (lot.door), tránh xa lòng đường Taxi!
@@ -198,13 +198,20 @@ bicycle.add(banhChungProp);
 bicycle.position.set(BIKE_START.x, 0, BIKE_START.z);
 scene.add(bicycle);
 
-// Vòng hào quang vàng-đỏ khi bật Lộc Lân húc bay Taxi!
-const lionAura = new THREE.Mesh(
+// Vòng & Quả cầu sáng opacity 0.28 bao quanh cơ thể Lan & xe đạp khi bật Trống Lân Hộ Thể!
+const lionAura = new THREE.Group();
+const auraRing = new THREE.Mesh(
   new THREE.RingGeometry(1.5, 2.2, 24),
   new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
 );
-lionAura.rotation.x = -Math.PI / 2;
-lionAura.position.y = 0.12;
+auraRing.rotation.x = -Math.PI / 2;
+auraRing.position.y = 0.12;
+const auraSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(1.85, 20, 16),
+  new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.28, depthWrite: false })
+);
+auraSphere.position.y = 1.05;
+lionAura.add(auraRing, auraSphere);
 lionAura.visible = false;
 playerRoot.add(lionAura);
 
@@ -573,7 +580,10 @@ function animate(now) {
     state.stunTimer = Math.max(0, state.stunTimer - dt);
     state.hitCooldown = Math.max(0, state.hitCooldown - dt);
     lionAura.visible = state.lionBuff > 0;
-    if (lionAura.visible) lionAura.rotation.z += 4 * dt;
+    if (lionAura.visible) {
+      lionAura.rotation.y += 3.5 * dt;
+      auraSphere.scale.setScalar(1 + Math.sin(now * 0.01) * 0.06);
+    }
 
     if (state.orders.length > 0) {
       const coolRate = state.perks.leaf ? 1.5 : 3.2;

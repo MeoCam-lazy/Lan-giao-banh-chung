@@ -1,0 +1,63 @@
+Credit lines for CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+
+If you share or re-host one of these mesh files under CC BY, keep its line with it
+(the same line covers that model's .fbx, .usdz, .usda and .obj). Under the Polyfork
+licence no credit is needed. LICENSE.txt has both.
+
+alley-concrete-tile.glb  Alley Concrete Tile by Polyfork (https://polyfork.dev/asset/alley-concrete-tile-56117b), CC BY 4.0
+apartment-mansion.glb  Apartment Block by Polyfork (https://polyfork.dev/asset/apartment-block-6445af), CC BY 4.0
+asphalt-road-tile.glb  Asphalt Road Tile by Polyfork (https://polyfork.dev/asset/asphalt-road-tile-f6593c), CC BY 4.0
+beverage-crate.glb  Beverage Crate by Polyfork (https://polyfork.dev/asset/beverage-crate-c195c9), CC BY 4.0
+bicycle-parking-rack.glb  Bicycle Parking Rack by Polyfork (https://polyfork.dev/asset/bicycle-parking-rack-282058), CC BY 4.0
+cherry-blossom-tree.glb  Cherry Blossom Tree by Polyfork (https://polyfork.dev/asset/cherry-blossom-tree-3f7ab7), CC BY 4.0
+city-bicycle.glb  City Bicycle by Polyfork (https://polyfork.dev/asset/city-bicycle-5b67d1), CC BY 4.0
+city-taxi.glb  City Taxi by Polyfork (https://polyfork.dev/asset/city-taxi-eefa91), CC BY 4.0
+city-tram.glb  City Tram by Polyfork (https://polyfork.dev/asset/city-tram-0d092d), CC BY 4.0
+concrete-block-wall.glb  Concrete Block Wall by Polyfork (https://polyfork.dev/asset/concrete-block-wall-02c715), CC BY 4.0
+convex-traffic-mirror.glb  Convex Traffic Mirror by Polyfork (https://polyfork.dev/asset/convex-traffic-mirror-a64d15), CC BY 4.0
+delivery-moped.glb  Delivery Moped by Polyfork (https://polyfork.dev/asset/delivery-moped-1aa2ce), CC BY 4.0
+external-staircase.glb  External Staircase by Polyfork (https://polyfork.dev/asset/external-staircase-89f471), CC BY 4.0
+fabric-awning.glb  Fabric Awning by Polyfork (https://polyfork.dev/asset/fabric-awning-4d6acc), CC BY 4.0
+garden-rock.glb  Garden Rock by Polyfork (https://polyfork.dev/asset/garden-rock-2d3b51), CC BY 4.0
+gas-meter-box.glb  Meter Box by Polyfork (https://polyfork.dev/asset/meter-box-1e6e42), CC BY 4.0
+guardrail-section.glb  Guardrail Section by Polyfork (https://polyfork.dev/asset/guardrail-section-68c3c4), CC BY 4.0
+kanji-signboard.glb  Vertical Kanji Signboard by Polyfork (https://polyfork.dev/asset/vertical-kanji-signboard-cc5162), CC BY 4.0
+kei-van.glb  Kei Van by Polyfork (https://polyfork.dev/asset/kei-van-211ed5), CC BY 4.0
+komainu-statue.glb  Guardian Lion Statue by Polyfork (https://polyfork.dev/asset/guardian-lion-statue-5bde18), CC BY 4.0
+konbini-store.glb  Convenience Store by Polyfork (https://polyfork.dev/asset/convenience-store-c30e1d), CC BY 4.0
+noren-curtain.glb  Noren Curtain by Polyfork (https://polyfork.dev/asset/noren-curtain-7b9e53), CC BY 4.0
+offering-box.glb  Offering Box by Polyfork (https://polyfork.dev/asset/offering-box-c85bd3), CC BY 4.0
+pachinko-parlour.glb  Amusement Parlour by Polyfork (https://polyfork.dev/asset/amusement-parlour-7eb45f), CC BY 4.0
+paper-lantern.glb  Paper Lantern by Polyfork (https://polyfork.dev/asset/paper-lantern-3387e9), CC BY 4.0
+pavement-tile.glb  Pavement Tile by Polyfork (https://polyfork.dev/asset/pavement-tile-8a9740), CC BY 4.0
+planter-flower-box.glb  Flower Planter by Polyfork (https://polyfork.dev/asset/flower-planter-550bfb), CC BY 4.0
+plastic-drum.glb  Plastic Drum by Polyfork (https://polyfork.dev/asset/plastic-drum-da992f), CC BY 4.0
+post-box.glb  Red Post Box by Polyfork (https://polyfork.dev/asset/red-post-box-f12045), CC BY 4.0
+potted-shrub.glb  Potted Shrub by Polyfork (https://polyfork.dev/asset/potted-shrub-43bd21), CC BY 4.0
+ramen-yatai-stall.glb  Ramen Yatai Stall by Polyfork (https://polyfork.dev/asset/ramen-yatai-stall-53974b), CC BY 4.0
+roller-shutter.glb  Roller Shutter by Polyfork (https://polyfork.dev/asset/roller-shutter-c58b4f), CC BY 4.0
+rubbish-bin.glb  Street Bin by Polyfork (https://polyfork.dev/asset/street-bin-770173), CC BY 4.0
+salaryman-character.glb  Salaryman Commuter by Polyfork (https://polyfork.dev/asset/salaryman-commuter-4170c1), CC BY 4.0
+sandwich-board-sign.glb  Sandwich Board Sign by Polyfork (https://polyfork.dev/asset/sandwich-board-sign-cb5e7c), CC BY 4.0
+sento-bathhouse.glb  Bathhouse by Polyfork (https://polyfork.dev/asset/bathhouse-4ac41a), CC BY 4.0
+shophouse-corner.glb  Corner Shophouse by Polyfork (https://polyfork.dev/asset/corner-shophouse-ad15c2), CC BY 4.0
+shophouse-three-storey.glb  Three-Storey Shophouse by Polyfork (https://polyfork.dev/asset/three-storey-shophouse-2f6378), CC BY 4.0
+shophouse-two-storey.glb  Two-Storey Shophouse by Polyfork (https://polyfork.dev/asset/two-storey-shophouse-183790), CC BY 4.0
+shophouse-wide.glb  Wide Shophouse by Polyfork (https://polyfork.dev/asset/wide-shophouse-089f20), CC BY 4.0
+shopkeeper-character.glb  Shopkeeper by Polyfork (https://polyfork.dev/asset/shopkeeper-be5547), CC BY 4.0
+shrine-hall.glb  Small Shrine Hall by Polyfork (https://polyfork.dev/asset/small-shrine-hall-cb8b25), CC BY 4.0
+shrine-stone-fence-panel.glb  Stone Fence Panel by Polyfork (https://polyfork.dev/asset/stone-fence-panel-56d138), CC BY 4.0
+stone-lantern.glb  Stone Lantern by Polyfork (https://polyfork.dev/asset/stone-lantern-d56d0a), CC BY 4.0
+street-lamp.glb  Street Lamp by Polyfork (https://polyfork.dev/asset/street-lamp-29f365), CC BY 4.0
+student-character.glb  School Student by Polyfork (https://polyfork.dev/asset/school-student-385134), CC BY 4.0
+temizuya-basin.glb  Purification Basin by Polyfork (https://polyfork.dev/asset/purification-basin-93d3e5), CC BY 4.0
+tiled-roof-section.glb  Tiled Roof Section by Polyfork (https://polyfork.dev/asset/tiled-roof-section-6f1121), CC BY 4.0
+torii-gate.glb  Torii Gate by Polyfork (https://polyfork.dev/asset/torii-gate-402f30), CC BY 4.0
+traffic-cone.glb  Traffic Cone by Polyfork (https://polyfork.dev/asset/traffic-cone-247748), CC BY 4.0
+traffic-signal.glb  Traffic Signal by Polyfork (https://polyfork.dev/asset/traffic-signal-2a517e), CC BY 4.0
+tram-track-tile.glb  Tram Track Tile by Polyfork (https://polyfork.dev/asset/tram-track-tile-f3c69a), CC BY 4.0
+utility-pole.glb  Utility Pole by Polyfork (https://polyfork.dev/asset/utility-pole-574130), CC BY 4.0
+vending-machine.glb  Vending Machine by Polyfork (https://polyfork.dev/asset/vending-machine-471c29), CC BY 4.0
+wall-air-con-unit.glb  Air-Con Unit by Polyfork (https://polyfork.dev/asset/air-con-unit-9fadc2), CC BY 4.0
+wooden-bench.glb  Wooden Bench by Polyfork (https://polyfork.dev/asset/wooden-bench-661da4), CC BY 4.0
+yokocho-bar-hut.glb  Alley Bar Hut by Polyfork (https://polyfork.dev/asset/alley-bar-hut-3e41f8), CC BY 4.0

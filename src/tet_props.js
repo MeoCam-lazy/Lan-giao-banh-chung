@@ -98,52 +98,67 @@ export function createBanhChungPot(x, z) {
   return g;
 }
 
-// Trang trí Cây Nêu, Dây Đèn Lồng Đỏ giăng ngang phố, Dây Pháo Đỏ & Hoa Mai/Đào
-export function scatterTetDecor(scene, streetsX, streetsZ) {
+// Trang trí Cây Nêu, Dây Đèn Lồng Đỏ & Chậu Mai/Đào: kiểm tra place.surfaceAt() để KHÔNG lệch ra lòng đường!
+export function scatterTetDecor(scene, streetsX, streetsZ, place) {
   const lanternMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xdc2626, emissiveIntensity: 0.75 });
   const capMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
   const bambooMat = new THREE.MeshStandardMaterial({ color: 0x65a30d });
   const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xbe123c, emissiveIntensity: 0.35 });
 
-  streetsZ.forEach((sz) => {
-    for (let x = -40; x <= 40; x += 16) {
-      [-4.3, 4.3].forEach((offZ, side) => {
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 4.2, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
-        pole.position.set(x, 2.1, sz + offZ);
-        const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 8), lanternMat);
-        lantern.scale.y = 1.25;
-        lantern.position.set(x, 3.8, sz + offZ);
-        const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 8), capMat);
-        cap.position.set(x, 4.25, sz + offZ);
-        scene.add(pole, lantern, cap);
+  const isSidewalk = (x, z) => {
+    const surf = place?.surfaceAt ? place.surfaceAt(x, z) : '';
+    return (!surf || !surf.includes('road')) && (!place?.blocked || !place.blocked(x, z, 0.6));
+  };
 
-        // Chậu Mai Vàng & Hoa Đào xen kẽ ven đường
-        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.25, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0xb91c1c }));
-        pot.position.set(x + 2.2, 0.22, sz + offZ);
-        const blossom = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55), side === 0 ? capMat : pinkMat);
-        blossom.position.set(x + 2.2, 0.95, sz + offZ);
-        scene.add(pot, blossom);
+  streetsZ.forEach((sz) => {
+    for (let x = -42; x <= 42; x += 14) {
+      [-4.9, 4.9].forEach((offZ, side) => {
+        const px = x;
+        const pz = sz + offZ;
+        if (isSidewalk(px, pz)) {
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 4.2, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+          pole.position.set(px, 2.1, pz);
+          const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 8), lanternMat);
+          lantern.scale.y = 1.25;
+          lantern.position.set(px, 3.8, pz);
+          const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 8), capMat);
+          cap.position.set(px, 4.25, pz);
+          scene.add(pole, lantern, cap);
+        }
+
+        // Chậu Mai Vàng & Hoa Đào đặt gọn trên vỉa hè
+        const bx = x + 2.4;
+        const bz = sz + (side === 0 ? -5.1 : 5.1);
+        if (isSidewalk(bx, bz)) {
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.25, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0xb91c1c }));
+          pot.position.set(bx, 0.22, bz);
+          const blossom = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55), side === 0 ? capMat : pinkMat);
+          blossom.position.set(bx, 0.95, bz);
+          scene.add(pot, blossom);
+        }
       });
 
-      // Dây đèn lồng đỏ giăng ngang qua đường!
-      if (x % 32 === 0) {
-        const wire = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 8.6), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-        wire.position.set(x, 4.3, sz);
+      // Dây đèn lồng đỏ giăng cao 4.4m ngang qua đường
+      if (x % 28 === 0) {
+        const wire = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 9.6), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        wire.position.set(x, 4.4, sz);
         scene.add(wire);
         for (let lz = -3.0; lz <= 3.0; lz += 1.5) {
           const hang = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), lanternMat);
-          hang.position.set(x, 4.05, sz + lz);
+          hang.position.set(x, 4.15, sz + lz);
           scene.add(hang);
         }
       }
     }
 
-    // Cây Nêu Ngày Tết ở mỗi giao lộ lớn
-    const neu = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 7.2, 6), bambooMat);
-    neu.position.set(3.8, 3.6, sz + 4.4);
-    const flag = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.55, 0.06), new THREE.MeshBasicMaterial({ color: 0xe11d48 }));
-    flag.position.set(4.4, 6.6, sz + 4.4);
-    scene.add(neu, flag);
+    // Cây Nêu Ngày Tết đặt chắc chắn trên vỉa hè
+    if (isSidewalk(5.2, sz + 5.2)) {
+      const neu = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 7.2, 6), bambooMat);
+      neu.position.set(5.2, 3.6, sz + 5.2);
+      const flag = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.55, 0.06), new THREE.MeshBasicMaterial({ color: 0xe11d48 }));
+      flag.position.set(5.8, 6.6, sz + 5.2);
+      scene.add(neu, flag);
+    }
   });
 }
 
