@@ -15,7 +15,7 @@ const HS_KEY = 'lan_banh_chung_hs';
 
 const UPGRADES = [
   { id: 'kite', icon: '🪁', title: 'Cánh Diều Lướt Gió', desc: '+25% tốc độ đạp xe đi biếu bánh' },
-  { id: 'leaf', icon: '🌿', title: 'Lá Dong Giữ Nhiệt', desc: 'Bánh Chưng lâu nguội hơn 50%' },
+  { id: 'leaf', icon: '🌿', title: 'Lá Dong Giữ Nhiệt', desc: 'Bánh lâu nguội hơn 75% & +30% tiền Lì Xì khi còn nóng' },
   { id: 'drum', icon: '🥁', title: 'Trống Lân Hộ Thể', desc: 'Hào Quang Lân kéo dài 12 giây húc bay Taxi!' },
 ];
 
@@ -603,7 +603,12 @@ function updateUI() {
   bagCountEl.textContent = `${state.orders.length}/1`;
   if (!state.riding) orderEl.textContent = 'Bước 1: Đi bộ tới Xe Đạp Đỏ!';
   else if (state.returningHome) orderEl.textContent = '🏠 ĐÃ BIẾU ĐỦ 4 NHÀ! MAU VỀ NHÀ ĐÓN GIAO THỪA!';
-  else orderEl.textContent = state.orders.length > 0 ? `Biếu Bánh Chưng: ${state.orders[0].name}` : `Ghé Bếp Mẹ lấy bánh (${state.deliveredIds.size}/4 nhà)`;
+  else if (state.orders.length > 0) {
+    const tag = state.warmth >= 75 ? '🔥 Nóng hổi (xCombo)' : (state.warmth >= 30 ? '♨️ Hơi nguội' : '❄️ Nguội ngắt (Mất Combo!)');
+    orderEl.textContent = `Biếu ${state.orders[0].name} • ${tag}`;
+  } else {
+    orderEl.textContent = `Ghé Bếp Mẹ lấy bánh (${state.deliveredIds.size}/4 nhà)`;
+  }
   freshBar.style.width = `${Math.max(0, state.warmth)}%`;
   scoreEl.textContent = state.score;
   highScoreEl.textContent = state.highScore;
@@ -720,8 +725,8 @@ function animate(now) {
     if (stunHalo.visible) stunHalo.rotation.y += 7.5 * dt;
 
     if (state.orders.length > 0) {
-      const coolRate = state.perks.leaf ? 1.5 : 3.2;
-      state.warmth = Math.max(25, state.warmth - coolRate * dt);
+      const coolRate = state.perks.leaf ? 0.85 : 3.5;
+      state.warmth = Math.max(0, state.warmth - coolRate * dt);
     }
 
     if (state.timeLeft <= 0) { state.timeLeft = 0; endGame('OUTSIDE'); }
@@ -783,10 +788,29 @@ function animate(now) {
         const t = state.orders[i];
         if (Math.hypot(playerRoot.position.x - t.dropX, playerRoot.position.z - t.dropZ) < 3.8) {
           const mult = state.lionBuff > 0 ? 2 : 1;
-          const gained = Math.round(state.warmth * 2.2 * state.combo * mult);
-          state.score += gained; state.delivered += 1; state.deliveredIds.add(t.id); state.combo += 1;
+          const leafBonus = state.perks.leaf && state.warmth >= 75 ? 1.3 : 1.0;
+          let gained = 20;
+          let bonusTime = 2;
+          let reaction = '';
+
+          if (state.warmth >= 75) {
+            gained = Math.round(state.warmth * 2.5 * state.combo * mult * leafBonus);
+            state.combo += 1;
+            bonusTime = 5;
+            reaction = `🧧 ${t.name}: "${t.msg}" (+${gained}đ Lì Xì!)`;
+          } else if (state.warmth >= 30) {
+            gained = Math.round(state.warmth * 1.2 * mult);
+            bonusTime = 3;
+            reaction = `♨️ ${t.name}: "Bánh hơi nguội rồi, lì xì nhẹ nha!" (+${gained}đ)`;
+          } else {
+            state.combo = 1;
+            gained = 20 * mult;
+            reaction = `❄️ ${t.name}: "Ôi bánh nguội ngắt rồi! Mất Combo!" (+${gained}đ)`;
+          }
+
+          state.score += gained; state.delivered += 1; state.deliveredIds.add(t.id);
           state.maxCombo = Math.max(state.maxCombo, state.combo);
-          state.timeLeft = Math.min(totalRealSeconds, state.timeLeft + 4);
+          state.timeLeft = Math.min(totalRealSeconds, state.timeLeft + bonusTime);
           state.orders.splice(i, 1);
           syncMarkers(); sfx.playDeliver(state.combo);
           spawnEmojis(t.dropX, t.dropZ);
@@ -795,7 +819,7 @@ function animate(now) {
             state.returningHome = true;
             showToast(`🎉 Đã biếu đủ 4 nhà! Mau về Nhà Mẹ đón Giao Thừa trước 00:00!`);
           } else {
-            showToast(`🧧 ${t.name}: "${t.msg}" (+${gained}đ)`);
+            showToast(reaction, state.warmth < 30);
             if (state.delivered >= state.nextUpgradeAt) { state.nextUpgradeAt += 2; openUpgradeMenu(); }
           }
           break;
@@ -826,7 +850,7 @@ function animate(now) {
               state.trauma = 0.85;
               sfx.playHit();
               if (state.orders.length > 0) {
-                state.warmth = Math.max(25, state.warmth - 25);
+                state.warmth = Math.max(0, state.warmth - 25);
                 state.combo = 1;
                 showToast('💫 Choáng váng! Nguội mất 25% bánh!', true);
               } else {
