@@ -100,13 +100,13 @@ const BIKE_START = bikeLot
   ? { x: bikeLot.door[0], z: bikeLot.door[1] }
   : { x: MOM_POS.x + 11, z: MOM_POS.z + 9 };
 
-// Nồi Bánh Chưng & Nhân vật Mẹ đứng ở nhà đưa bánh cho Lan (bỏ cổng chào cho thoáng)
+// Nồi Bánh Chưng & Nhân vật Mẹ đứng thẳng nghiêm chỉnh hướng mặt ra đường (không chạy Idle nghiêng)
 const fireworks = createFireworkSystem(scene);
-scene.add(createBanhChungPot(MOM_POS.x + 1.3, MOM_POS.z));
+scene.add(createBanhChungPot(MOM_POS.x + sideDir[0] * 1.1, MOM_POS.z + sideDir[1] * 1.1));
 const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
 momNpc.position.set(MOM_POS.x - sideDir[0] * 1.1, 0, MOM_POS.z - sideDir[1] * 1.1);
-momNpc.lookAt(HOME_POS.x, 0, HOME_POS.z);
+momNpc.rotation.set(0, homeLot.facing ?? 0, 0);
 scene.add(momNpc);
 
 const RELATIVES = [
@@ -139,7 +139,6 @@ bikeRing.position.set(BIKE_START.x, 0.08, BIKE_START.z);
 scene.add(shopRing, bikeRing);
 
 const npcAnims = [];
-animateHumanoid(momNpc).then((a) => { if (a) { a.locomotion(0); npcAnims.push(a); } }).catch(() => {});
 
 const houseMarkers = TEACHERS.map((t) => {
   const beacon = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 14, 20, 1, true), new THREE.MeshBasicMaterial({ color: t.color, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
@@ -428,6 +427,15 @@ function startOrReset(climax = false) {
   traffic.forEach((c) => { c.fly = 0; c.mesh.position.y = 0; c.mesh.rotation.x = 0; });
 
   playerRoot.position.set(HOME_POS.x, 0, HOME_POS.z);
+  // Quay mặt Lan và Camera hướng thẳng ra phía Xe Đạp / đường phố cho thoáng tầm nhìn!
+  const startAngle = Math.atan2(BIKE_START.x - HOME_POS.x, BIKE_START.z - HOME_POS.z);
+  playerRoot.rotation.y = startAngle;
+  smoothCamYaw = startAngle;
+  camera.position.set(
+    HOME_POS.x - Math.sin(startAngle) * 10.5,
+    6.8,
+    HOME_POS.z - Math.cos(startAngle) * 10.5
+  );
   if (climax) mountBike();
   syncMarkers();
   startScreen.classList.add('hidden');
@@ -476,6 +484,16 @@ document.querySelectorAll('.diff-btn').forEach((btn) => {
 });
 document.getElementById('btn-start').onclick = () => startOrReset(false);
 document.getElementById('btn-restart').onclick = () => startOrReset(false);
+document.getElementById('btn-home').onclick = () => {
+  sfx.stopBGM();
+  dismountBike();
+  state.phase = 'START';
+  state.fireworkTimer = 0;
+  gameoverScreen.classList.add('hidden');
+  hud.classList.add('hidden');
+  endingBannerEl.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+};
 window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
 function updateUI() {
