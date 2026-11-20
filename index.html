@@ -72,21 +72,40 @@
     </div>
   </div>
 
-  <!-- Màn hình bắt đầu -->
-  <div id="start-screen" class="overlay">
-    <div class="modal">
+  <!-- Màn hình bắt đầu: Cinematic Live 3D Title Screen (Phương án A) -->
+  <div id="start-screen" class="title-screen">
+    <div class="title-left">
       <div class="badge">IT GAME JAM 2026 • DÂN GIAN REMIX</div>
-      <h1>🥟 LAN GIAO BÁNH CHƯNG 🦁</h1>
-      <p class="subtitle">
-        <b>23:50 Đêm 30 Tết!</b> Giao hết bánh chưng cho đủ <b>4 nhà họ hàng</b> rồi đạp về nhà trước <b>00:00</b> để đón Giao Thừa cùng Mẹ &amp; xem Pháo Hoa — nếu trễ giờ, Lan phải xem pháo hoa một mình ngoài đường!
+      <h1 class="game-logo">
+        <span class="logo-top">LAN GIAO</span>
+        <span class="logo-main">BÁNH CHƯNG</span>
+      </h1>
+      <p class="tagline">
+        <b>23:50 Đêm 30 Tết</b> — Biếu đủ 4 nhà họ hàng &amp; đạp xe về nhà trước <b>00:00</b> đón Giao Thừa cùng Mẹ!
       </p>
-      <div class="rules-grid">
-        <div class="rule-item"><span>🥟</span> Ghé <b>Bếp Mẹ</b> lấy Bánh Chưng, biếu đủ <b>4 nhà</b> rồi quay về nhà đón Giao Thừa</div>
-        <div class="rule-item"><span>🦁</span> Gặp <b>Đoàn Múa Lân</b>: Bấm <b>Space</b> bật <i>Hào Quang Lân</i> húc bay Taxi (+150đ)!</div>
-        <div class="rule-item"><span>🎆</span> Giao đủ &amp; về nhà trước <b>00:00</b> để mở <b>Happy Ending</b> bắn pháo hoa!</div>
+
+      <div class="diff-group">
+        <span class="diff-label">CHỌN NHỊP ĐỘ DEADLINE:</span>
+        <div class="diff-pills">
+          <button class="diff-btn" data-sec="120">Thư giãn (120s)</button>
+          <button class="diff-btn active" data-sec="90">Chuẩn (90s)</button>
+          <button class="diff-btn" data-sec="60">Siêu gắt (60s)</button>
+        </div>
       </div>
-      <button id="btn-start" class="btn-primary">CHẠY DEADLINE CHO MẸ (SPACE)</button>
-      <div class="credit">3D Street Kit: Polyfork (CC BY 4.0) • Cây Nêu, Múa Lân &amp; Bánh Chưng</div>
+
+      <button id="btn-start" class="btn-play">▶ BẮT ĐẦU CHẠY DEADLINE (SPACE)</button>
+
+      <div class="title-meta">
+        <span>🏆 Kỷ lục: <b id="start-best">0</b>đ</span>
+        <span>•</span>
+        <span>3D Assets: Polyfork (CC BY 4.0)</span>
+      </div>
+    </div>
+
+    <div class="title-corner-hint">
+      <div><b>WASD</b> Đạp xe</div>
+      <div><b>SPACE</b> Chuông / Gõ trống Múa Lân húc Taxi</div>
+      <div><b>00:00</b> Về kịp nhà mở Happy Ending Pháo Hoa</div>
     </div>
   </div>
 

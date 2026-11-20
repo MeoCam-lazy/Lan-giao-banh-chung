@@ -10,7 +10,7 @@ import { createAsset as createSalaryman } from '../assets/salaryman-character.mj
 import { createAsset as createTaxi } from '../assets/city-taxi.mjs';
 import { createAsset as createVan } from '../assets/kei-van.mjs';
 
-const TOTAL_REAL_SECONDS = 90;
+let totalRealSeconds = 90;
 const HS_KEY = 'lan_banh_chung_hs';
 
 const UPGRADES = [
@@ -22,7 +22,7 @@ const UPGRADES = [
 const state = {
   phase: 'START',
   riding: false,
-  timeLeft: TOTAL_REAL_SECONDS,
+  timeLeft: totalRealSeconds,
   score: 0,
   highScore: Number(localStorage.getItem(HS_KEY) || 0),
   delivered: 0,
@@ -360,7 +360,7 @@ function startOrReset(climax = false) {
   sfx.unlock();
   dismountBike();
   state.phase = 'PLAYING';
-  state.timeLeft = climax ? 22 : TOTAL_REAL_SECONDS;
+  state.timeLeft = climax ? 22 : totalRealSeconds;
   state.score = 0;
   state.delivered = 0;
   state.deliveredIds = new Set();
@@ -419,12 +419,20 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'F2') startOrReset(true);
 });
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+document.getElementById('start-best').textContent = state.highScore;
+document.querySelectorAll('.diff-btn').forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll('.diff-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    totalRealSeconds = Number(btn.dataset.sec || 90);
+  };
+});
 document.getElementById('btn-start').onclick = () => startOrReset(false);
 document.getElementById('btn-restart').onclick = () => startOrReset(false);
 window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
 function updateUI() {
-  const ratio = 1 - Math.max(0, state.timeLeft) / TOTAL_REAL_SECONDS;
+  const ratio = 1 - Math.max(0, state.timeLeft) / totalRealSeconds;
   const totalSec = Math.floor(ratio * 600);
   const mins = 50 + Math.floor(totalSec / 60);
   clockEl.textContent = mins >= 60 ? '00:00:00' : `23:${String(mins).padStart(2, '0')}:${String(totalSec % 60).padStart(2, '0')}`;
@@ -597,7 +605,7 @@ function animate(now) {
           const gained = Math.round(state.warmth * 2.2 * state.combo * mult);
           state.score += gained; state.delivered += 1; state.deliveredIds.add(t.id); state.combo += 1;
           state.maxCombo = Math.max(state.maxCombo, state.combo);
-          state.timeLeft = Math.min(TOTAL_REAL_SECONDS, state.timeLeft + 4);
+          state.timeLeft = Math.min(totalRealSeconds, state.timeLeft + 4);
           state.orders.splice(i, 1);
           syncMarkers(); sfx.playDeliver(state.combo);
           spawnEmojis(t.dropX, t.dropZ);
@@ -660,19 +668,26 @@ function animate(now) {
   state.trauma = Math.max(0, state.trauma - 2.2 * dt);
   const shake = state.trauma * state.trauma * 1.1;
 
-  let yawDiff = playerRoot.rotation.y - smoothCamYaw;
-  while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
-  while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
-  smoothCamYaw += yawDiff * Math.min(1, 2.8 * dt);
+  // Camera Cinematic quay vòng chậm quanh Phố Tết khi ở màn hình Start
+  if (state.phase === 'START') {
+    const orbit = now * 0.00025;
+    camera.position.set(MOM_POS.x + Math.sin(orbit) * 20, 10.5, MOM_POS.z + Math.cos(orbit) * 20);
+    camera.lookAt(MOM_POS.x, 1.5, MOM_POS.z);
+  } else {
+    let yawDiff = playerRoot.rotation.y - smoothCamYaw;
+    while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
+    while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+    smoothCamYaw += yawDiff * Math.min(1, 2.8 * dt);
 
-  const fx = Math.sin(smoothCamYaw); const fz = Math.cos(smoothCamYaw);
-  const camOffset = state.camMode === 0 ? new THREE.Vector3(-fx * 10.5, 5.8, -fz * 10.5) : new THREE.Vector3(0, 26, 12);
-  camera.position.lerp(new THREE.Vector3(playerRoot.position.x + camOffset.x + (Math.random() - 0.5) * shake, camOffset.y, playerRoot.position.z + camOffset.z + (Math.random() - 0.5) * shake), 4.5 * dt);
-  camera.lookAt(playerRoot.position.x + (state.camMode === 0 ? fx * 5.5 : 0), 1.2, playerRoot.position.z + (state.camMode === 0 ? fz * 5.5 : 0));
+    const fx = Math.sin(smoothCamYaw); const fz = Math.cos(smoothCamYaw);
+    const camOffset = state.camMode === 0 ? new THREE.Vector3(-fx * 10.5, 5.8, -fz * 10.5) : new THREE.Vector3(0, 26, 12);
+    camera.position.lerp(new THREE.Vector3(playerRoot.position.x + camOffset.x + (Math.random() - 0.5) * shake, camOffset.y, playerRoot.position.z + camOffset.z + (Math.random() - 0.5) * shake), 4.5 * dt);
+    camera.lookAt(playerRoot.position.x + (state.camMode === 0 ? fx * 5.5 : 0), 1.2, playerRoot.position.z + (state.camMode === 0 ? fz * 5.5 : 0));
+  }
 
   const proj = new THREE.Vector3();
   labelNodes.forEach((ln) => {
-    if (ln.id === -2 && state.riding) { ln.el.style.display = 'none'; return; }
+    if (state.phase === 'START' || (ln.id === -2 && state.riding)) { ln.el.style.display = 'none'; return; }
     proj.set(ln.x, ln.y, ln.z).project(camera);
     if (proj.z > 1) { ln.el.style.display = 'none'; return; }
     ln.el.style.display = 'block';
