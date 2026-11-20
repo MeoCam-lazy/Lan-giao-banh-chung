@@ -304,17 +304,35 @@ lionAura.add(auraRing, auraSphere);
 lionAura.visible = false;
 playerRoot.add(lionAura);
 
-// Mũi tên 3D chỉ đường hoàn chỉnh (thân dài + đầu nhọn dẹt rõ ràng)
+// Mũi tên 3D chỉ đường nằm ngang phẳng (song song mặt đất, dễ nhìn từ mọi góc độ)
 const arrowGroup = new THREE.Group();
-const arrowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
-const arrowTail = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.6), arrowMat);
-arrowTail.position.set(0, 2.45, 0.1);
-const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.55, 4), arrowMat);
-arrowHead.rotation.x = Math.PI / 2;
-arrowHead.rotation.y = Math.PI / 4;
-arrowHead.scale.set(1, 1, 0.35);
-arrowHead.position.set(0, 2.45, 0.62);
-arrowGroup.add(arrowTail, arrowHead);
+const arrowShape = new THREE.Shape();
+arrowShape.moveTo(0, 0.72);
+arrowShape.lineTo(0.34, 0.14);
+arrowShape.lineTo(0.12, 0.14);
+arrowShape.lineTo(0.12, -0.42);
+arrowShape.lineTo(-0.12, -0.42);
+arrowShape.lineTo(-0.12, 0.14);
+arrowShape.lineTo(-0.34, 0.14);
+arrowShape.closePath();
+const arrowGeo = new THREE.ExtrudeGeometry(arrowShape, {
+  depth: 0.1,
+  bevelEnabled: true,
+  bevelThickness: 0.02,
+  bevelSize: 0.02,
+  bevelSegments: 1,
+});
+arrowGeo.center();
+const arrowMat = new THREE.MeshStandardMaterial({
+  color: 0xfacc15,
+  emissive: 0xeab308,
+  emissiveIntensity: 0.65,
+  roughness: 0.25,
+});
+const arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
+arrowMesh.rotation.x = Math.PI / 2;
+arrowMesh.position.set(0, 2.45, 0.15);
+arrowGroup.add(arrowMesh);
 playerRoot.add(arrowGroup);
 playerRoot.position.set(HOME_POS.x, 0, HOME_POS.z);
 scene.add(playerRoot);
