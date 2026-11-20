@@ -90,7 +90,8 @@ const lots = place.city?.lots || [];
 const homeLot = lots.find((l) => Math.hypot(l.door[0], l.door[1]) < 28) || lots[0] || { door: [0, -5], facing: 0 };
 const MOM_POS = { x: homeLot.door[0], z: homeLot.door[1] };
 const sideDir = Math.abs(Math.sin(homeLot.facing || 0)) > 0.5 ? [0, 1] : [1, 0];
-const HOME_POS = { x: MOM_POS.x + sideDir[0] * 2.2, z: MOM_POS.z + sideDir[1] * 2.2 };
+// Đặt Lan đứng ở khoảng trống vỉa hè thoáng đãng, không bị Nồi Bánh Chưng che trước mặt!
+const HOME_POS = { x: MOM_POS.x + sideDir[0] * 3.0, z: MOM_POS.z + sideDir[1] * 3.0 };
 // Đặt Xe Đạp ở vỉa hè phía bên kia đường (cách Bếp Mẹ 10-16m) để Lan đi bộ qua lấy rồi quay lại!
 const bikeLot = lots.find((l) => {
   const d = Math.hypot(l.door[0] - MOM_POS.x, l.door[1] - MOM_POS.z);
@@ -100,15 +101,28 @@ const BIKE_START = bikeLot
   ? { x: bikeLot.door[0], z: bikeLot.door[1] }
   : { x: MOM_POS.x + 11, z: MOM_POS.z + 9 };
 
-// Nồi Bánh Chưng & Nhân vật Mẹ đứng thẳng nghiêm chỉnh hướng mặt ra đường (không chạy Idle nghiêng)
+// Hạ 2 tay Mẹ xuôi theo thân (hết T-pose và đứng thẳng tự nhiên)
+function poseStandingRelaxed(npc) {
+  const lA = npc.getObjectByName('LeftArm');
+  const rA = npc.getObjectByName('RightArm');
+  const lF = npc.getObjectByName('LeftForeArm');
+  const rF = npc.getObjectByName('RightForeArm');
+  if (lA) lA.rotation.set(0.08, 0, -1.28);
+  if (rA) rA.rotation.set(0.08, 0, 1.28);
+  if (lF) lF.rotation.set(0, 0, -0.18);
+  if (rF) rF.rotation.set(0, 0, 0.18);
+}
+
+// Nồi Bánh Chưng đặt lệch sang bên trong cạnh Mẹ (không chắn đường Lan chạy ra Xe Đạp)
 const fireworks = createFireworkSystem(scene);
-scene.add(createBanhChungPot(MOM_POS.x + sideDir[0] * 1.1, MOM_POS.z + sideDir[1] * 1.1));
+scene.add(createBanhChungPot(MOM_POS.x - sideDir[0] * 1.9, MOM_POS.z - sideDir[1] * 1.9));
 const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
-momNpc.position.set(MOM_POS.x - sideDir[0] * 1.1, 0, MOM_POS.z - sideDir[1] * 1.1);
-momNpc.rotation.set(0, homeLot.facing ?? 0, 0);
+momNpc.position.set(MOM_POS.x - sideDir[0] * 0.4, 0, MOM_POS.z - sideDir[1] * 0.4);
+momNpc.rotation.set(0, Math.atan2(HOME_POS.x - momNpc.position.x, HOME_POS.z - momNpc.position.z), 0);
+poseStandingRelaxed(momNpc);
 const momFlag = createVietnamFlag();
-momFlag.position.set(MOM_POS.x - sideDir[0] * 1.8, 0, MOM_POS.z - sideDir[1] * 1.8);
+momFlag.position.set(MOM_POS.x - sideDir[0] * 2.5, 0, MOM_POS.z - sideDir[1] * 2.5);
 momFlag.rotation.y = homeLot.facing ?? 0;
 scene.add(momNpc, momFlag);
 
