@@ -224,20 +224,3 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
   letter-spacing: 0.08em;
   box-shadow: 6px 6px 0 #7f1d1d;
 }
-.mute-btn {
-  pointer-events: auto;
-  align-self: flex-start;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  border: 2px solid rgba(250, 204, 21, 0.55);
-  background: rgba(24, 14, 20, 0.88);
-  color: #fde047;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.12s;
-}
-.mute-btn:hover { transform: scale(1.06); }
