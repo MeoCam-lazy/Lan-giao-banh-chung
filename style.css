@@ -187,6 +187,34 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
 }
 .title-corner-hint b { color: #facc15; margin-right: 6px; }
 
+.github-corner-btn {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1.5px solid rgba(250, 204, 21, 0.45);
+  background: rgba(24, 14, 20, 0.85);
+  backdrop-filter: blur(8px);
+  color: #fef08a;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  transition: all 0.16s ease;
+  z-index: 30;
+}
+.github-corner-btn:hover {
+  border-color: #facc15;
+  background: rgba(225, 29, 72, 0.88);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45);
+}
+
 .ending-banner {
   position: fixed;
   top: 28px;
