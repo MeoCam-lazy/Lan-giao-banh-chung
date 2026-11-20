@@ -584,17 +584,8 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (state.phase === 'START') startOrReset(false);
     else if (state.phase === 'PLAYING' && state.riding) {
-      const nearLion = lions.find((l) => l.cd <= 0 && Math.hypot(playerRoot.position.x - l.x, playerRoot.position.z - l.z) < 8.0);
-      if (nearLion) {
-        nearLion.cd = 10;
-        state.lionBuff = state.perks.drum ? 12 : 8;
-        state.warmth = 100;
-        state.score += 200;
-        sfx.playLionDrum();
-        spawnEmojis(nearLion.x, nearLion.z, ['🦁', '🧧', '🎆', '🔥', '💰']);
-        showToast('🦁 HÀO QUANG LÂN! HÚC BAY TAXI & HÂM NÓNG BÁNH!');
-      } else if (state.boostTimer <= 0) {
-        state.boostTimer = 0.5;
+      if (state.boostTimer <= 0) {
+        state.boostTimer = 0.65;
         sfx.playBell();
       }
     }
