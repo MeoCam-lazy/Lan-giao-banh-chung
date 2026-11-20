@@ -440,7 +440,6 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'F2') startOrReset(true);
 });
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-document.getElementById('start-best').textContent = state.highScore;
 document.querySelectorAll('.diff-btn').forEach((btn) => {
   btn.onclick = () => {
     document.querySelectorAll('.diff-btn').forEach((b) => b.classList.remove('active'));

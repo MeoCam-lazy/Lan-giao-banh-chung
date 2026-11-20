@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lan Giao Bánh Chưng — Tết Dân Gian Remix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css" />
   <script type="importmap">
     {
@@ -73,10 +76,9 @@
     </div>
   </div>
 
-  <!-- Màn hình bắt đầu: Cinematic Live 3D Title Screen (Phương án A) -->
+  <!-- Màn hình bắt đầu: Cinematic Live 3D Title Screen -->
   <div id="start-screen" class="title-screen">
     <div class="title-left">
-      <div class="badge">IT GAME JAM 2026 • DÂN GIAN REMIX</div>
       <h1 class="game-logo">
         <span class="logo-top">LAN GIAO</span>
         <span class="logo-main">BÁNH CHƯNG</span>
@@ -86,21 +88,15 @@
       </p>
 
       <div class="diff-group">
-        <span class="diff-label">CHỌN NHỊP ĐỘ DEADLINE:</span>
+        <span class="diff-label">ĐỘ KHÓ (THỜI GIAN ĐẾM NGƯỢC):</span>
         <div class="diff-pills">
-          <button class="diff-btn" data-sec="120">Thư giãn (120s)</button>
+          <button class="diff-btn" data-sec="120">Dễ (120s)</button>
           <button class="diff-btn active" data-sec="90">Chuẩn (90s)</button>
-          <button class="diff-btn" data-sec="60">Siêu gắt (60s)</button>
+          <button class="diff-btn" data-sec="60">Khó (60s)</button>
         </div>
       </div>
 
-      <button id="btn-start" class="btn-play">▶ BẮT ĐẦU CHẠY DEADLINE (SPACE)</button>
-
-      <div class="title-meta">
-        <span>🏆 Kỷ lục: <b id="start-best">0</b>đ</span>
-        <span>•</span>
-        <span>3D Assets: Polyfork (CC BY 4.0)</span>
-      </div>
+      <button id="btn-start" class="btn-play">BẮT ĐẦU</button>
     </div>
 
     <div class="title-corner-hint">
