@@ -146,7 +146,7 @@ export function scatterTetDecor(scene, streetsX, streetsZ, place, reservedSpots 
   const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xbe123c, emissiveIntensity: 0.35 });
 
   const isSidewalk = (x, z) => {
-    if (reservedSpots.some((s) => Math.hypot(x - s.x, z - s.z) < 5.0)) return false;
+    if (reservedSpots.some((s) => Math.hypot(x - s.x, z - s.z) < 6.0)) return false;
     const surf = place?.surfaceAt ? place.surfaceAt(x, z) : '';
     return (!surf || !surf.includes('road')) && (!place?.blocked || !place.blocked(x, z, 0.6));
   };

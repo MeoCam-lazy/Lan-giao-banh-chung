@@ -111,8 +111,14 @@ const BIKE_START = bikeLot
   ? { x: bikeLot.door[0], z: bikeLot.door[1] }
   : { x: MOM_POS.x + 11, z: MOM_POS.z + 9 };
 
-// Hạ 2 tay xuôi theo thân (hết T-pose và đứng thẳng tự nhiên)
+// Hạ 2 tay xuôi theo thân & giữ thẳng xương sống/hông (hết nghiêng người)
 function poseStandingRelaxed(npc, wave = 0) {
+  const hips = npc.getObjectByName('Hips');
+  const sp = npc.getObjectByName('Spine');
+  const sp1 = npc.getObjectByName('Spine1');
+  if (hips) hips.rotation.set(0, 0, 0);
+  if (sp) sp.rotation.set(0, 0, 0);
+  if (sp1) sp1.rotation.set(0, 0, 0);
   const lA = npc.getObjectByName('LeftArm');
   const rA = npc.getObjectByName('RightArm');
   const lF = npc.getObjectByName('LeftForeArm');
@@ -123,15 +129,17 @@ function poseStandingRelaxed(npc, wave = 0) {
   if (rF) rF.rotation.set(0, 0, 0.18);
 }
 
-// Nồi Bánh Chưng đặt lệch sang bên trong cạnh Mẹ (không chắn đường Lan chạy ra Xe Đạp)
+// Nồi Bánh Chưng đặt lệch sang bên trong cạnh Mẹ; Cờ đặt cách xa nồi bánh chưng (không chạm mép nồi)
+const POT_POS = { x: MOM_POS.x - sideDir[0] * 1.9, z: MOM_POS.z - sideDir[1] * 1.9 };
+const FLAG_POS = { x: MOM_POS.x - sideDir[0] * 3.5, z: MOM_POS.z - sideDir[1] * 3.5 };
 const fireworks = createFireworkSystem(scene);
-scene.add(createBanhChungPot(MOM_POS.x - sideDir[0] * 1.9, MOM_POS.z - sideDir[1] * 1.9));
+scene.add(createBanhChungPot(POT_POS.x, POT_POS.z));
 const momNpc = createCafeCustomer({ figure: 'feminine', age: 'adult', expression: 'warm', coat: '#e11d48', shirt: '#fef08a' });
 momNpc.position.set(MOM_POS.x - sideDir[0] * 0.4, 0, MOM_POS.z - sideDir[1] * 0.4);
 momNpc.rotation.set(0, Math.atan2(HOME_POS.x - momNpc.position.x, HOME_POS.z - momNpc.position.z), 0);
 animateHumanoid(momNpc).then((a) => { if (a?.mixer) a.mixer.stopAllAction(); poseStandingRelaxed(momNpc); }).catch(() => {});
 const momFlag = createVietnamFlag();
-momFlag.position.set(MOM_POS.x - sideDir[0] * 3.1, 0, MOM_POS.z - sideDir[1] * 3.1);
+momFlag.position.set(FLAG_POS.x, 0, FLAG_POS.z);
 momFlag.rotation.y = homeLot.facing ?? 0;
 scene.add(momNpc, momFlag);
 
@@ -159,6 +167,8 @@ const TEACHERS = RELATIVES.map((t, i) => {
 // Trang trí phố sau khi đã chốt vị trí Bếp Mẹ & 4 Nhà Họ Hàng để không bị trùng chậu hoa!
 scatterTetDecor(scene, streetsX, streetsZ, place, [
   MOM_POS,
+  POT_POS,
+  FLAG_POS,
   HOME_POS,
   BIKE_START,
   ...TEACHERS.map((t) => ({ x: t.dropX, z: t.dropZ })),
@@ -294,11 +304,17 @@ lionAura.add(auraRing, auraSphere);
 lionAura.visible = false;
 playerRoot.add(lionAura);
 
+// Mũi tên 3D chỉ đường hoàn chỉnh (thân dài + đầu nhọn dẹt rõ ràng)
 const arrowGroup = new THREE.Group();
-const arrowCone = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.9, 8), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
-arrowCone.rotation.x = Math.PI / 2;
-arrowCone.position.set(0, 2.4, 0.35);
-arrowGroup.add(arrowCone);
+const arrowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+const arrowTail = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.6), arrowMat);
+arrowTail.position.set(0, 2.45, 0.1);
+const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.55, 4), arrowMat);
+arrowHead.rotation.x = Math.PI / 2;
+arrowHead.rotation.y = Math.PI / 4;
+arrowHead.scale.set(1, 1, 0.35);
+arrowHead.position.set(0, 2.45, 0.62);
+arrowGroup.add(arrowTail, arrowHead);
 playerRoot.add(arrowGroup);
 playerRoot.position.set(HOME_POS.x, 0, HOME_POS.z);
 scene.add(playerRoot);
@@ -888,13 +904,7 @@ function animate(now) {
               state.stunTimer = 0.75;
               state.trauma = 0.85;
               sfx.playHit();
-              if (state.orders.length > 0) {
-                state.warmth = Math.max(0, state.warmth - 25);
-                state.combo = 1;
-                showToast('💫 Choáng váng! Nguội mất 25% bánh!', true);
-              } else {
-                showToast('💫 Suýt tông xe! Cẩn thận đường Tết đông!', true);
-              }
+              showToast('💫 Đụng xe! Choáng váng mất 0.75s!', true);
             }
           }
           break;
