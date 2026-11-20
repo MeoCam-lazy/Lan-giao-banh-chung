@@ -66,8 +66,9 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
-const look = stage(renderer, scene, { time: 'golden' });
-const place = await buildKit({ folder: './assets/', city: { seed: 2026, blocks: [3, 2] }, people: 'idle' });
+// Bầu trời Đêm 30 Tết trước Giao Thừa: cửa sổ, đèn đường & đèn lồng rực sáng!
+const look = stage(renderer, scene, { time: 'dusk' });
+const place = await buildKit({ folder: './assets/', city: { seed: 2026, blocks: [3, 2] }, people: 'idle', night: true });
 scene.add(place.group);
 look.ground(place);
 look.shadows(place.group);
@@ -79,8 +80,8 @@ scatterTetDecor(scene, streetsX, streetsZ);
 const lots = place.city?.lots || [];
 const homeSpot = place.openSpot({ near: new THREE.Vector3(0, 0, 0) });
 const HOME_POS = { x: homeSpot.x, z: homeSpot.z };
-const BIKE_START = place.openSpot({ near: new THREE.Vector3(homeSpot.x + 5, 0, homeSpot.z + 2.5) });
-const MOM_POS = place.openSpot({ near: new THREE.Vector3(homeSpot.x - 8, 0, homeSpot.z - 6) });
+const BIKE_START = place.openSpot({ near: new THREE.Vector3(homeSpot.x + 3.8, 0, homeSpot.z + 2.0) });
+const MOM_POS = place.openSpot({ near: new THREE.Vector3(homeSpot.x - 3.5, 0, homeSpot.z - 2.5) });
 
 // Nồi Bánh Chưng của Mẹ & Nhân vật Mẹ đứng cạnh
 scene.add(createBanhChungPot(MOM_POS.x + 1.3, MOM_POS.z));
@@ -176,6 +177,9 @@ function applyRidingPose(phase) {
 }
 
 const bicycle = createBicycle({ colorway: 'post-red' });
+const bikeHeadlight = new THREE.PointLight(0xfef08a, 4.5, 14);
+bikeHeadlight.position.set(0, 1.1, 0.8);
+bicycle.add(bikeHeadlight);
 const banhChungProp = createBanhChungMesh();
 banhChungProp.position.set(0, 0.85, -0.58);
 banhChungProp.visible = false;
@@ -318,8 +322,8 @@ function endGame(crashed = false) {
   if (state.score > state.highScore) { state.highScore = state.score; localStorage.setItem(HS_KEY, String(state.highScore)); }
   hud.classList.add('hidden');
   gameoverScreen.classList.remove('hidden');
-  document.getElementById('go-badge').textContent = crashed ? '💥 TAI NẠN GIAO THÔNG!' : '🎆 12:00 — ĐẾN GIỜ CÚNG TẤT NIÊN!';
-  document.getElementById('go-title').textContent = crashed ? 'BỊ XE ĐỤNG RỒI — R.I.P! 💀' : 'HOÀN THÀNH DEADLINE CỦA MẸ!';
+  document.getElementById('go-badge').textContent = crashed ? '💥 TAI NẠN GIAO THÔNG!' : '🎆 00:00 — CHÚC MỪNG NĂM MỚI!';
+  document.getElementById('go-title').textContent = crashed ? 'BỊ XE ĐỤNG RỒI — R.I.P! 💀' : 'HOÀN THÀNH DEADLINE GIAO THỪA!';
   document.getElementById('final-score').textContent = state.score;
   document.getElementById('final-best').textContent = state.highScore;
   document.getElementById('final-delivered').textContent = state.delivered;
@@ -354,7 +358,7 @@ function startOrReset(climax = false) {
   gameoverScreen.classList.add('hidden');
   hud.classList.remove('hidden');
   sfx.startBGM(() => state.timeLeft < 25 || state.lionBuff > 0);
-  showToast(climax ? '⚡ 11:58 RỒI! SẮP TỚI GIỜ CÚNG TẤT NIÊN!' : '🏃 Mẹ hối rồi! Đi bộ ra Xe Đạp Đỏ mau!');
+  showToast(climax ? '⚡ 23:58 RỒI! SẮP ĐẾN GIAO THỪA!' : '🏃 Mẹ hối rồi! Từ nhà ra lấy Xe Đạp Đỏ mau!');
   updateUI();
 }
 
@@ -393,7 +397,7 @@ function updateUI() {
   const ratio = 1 - Math.max(0, state.timeLeft) / TOTAL_REAL_SECONDS;
   const totalSec = Math.floor(ratio * 600);
   const mins = 50 + Math.floor(totalSec / 60);
-  clockEl.textContent = mins >= 60 ? '12:00:00' : `11:${String(mins).padStart(2, '0')}:${String(totalSec % 60).padStart(2, '0')}`;
+  clockEl.textContent = mins >= 60 ? '00:00:00' : `23:${String(mins).padStart(2, '0')}:${String(totalSec % 60).padStart(2, '0')}`;
   realSubEl.textContent = state.lionBuff > 0 ? `🦁 HÚC TAXI (${state.lionBuff.toFixed(1)}s)` : `Còn ${Math.ceil(state.timeLeft)}s thực tế`;
   bagCountEl.textContent = `${state.orders.length}/1`;
   orderEl.textContent = !state.riding ? 'Bước 1: Đi bộ tới Xe Đạp Đỏ!' : (state.orders.length > 0 ? `Biếu Bánh Chưng: ${state.orders[0].name}` : 'Ghé Bếp Mẹ lấy cặp Bánh Chưng nóng!');
