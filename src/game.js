@@ -53,6 +53,7 @@ const container = document.getElementById('canvas-container');
 const labelsWrap = document.getElementById('world-labels');
 const hud = document.getElementById('hud');
 const startScreen = document.getElementById('start-screen');
+const introScreen = document.getElementById('intro-screen');
 const upgradeScreen = document.getElementById('upgrade-screen');
 const upgradeCardsEl = document.getElementById('upgrade-cards');
 const gameoverScreen = document.getElementById('gameover-screen');
@@ -534,7 +535,7 @@ function endGame(mode = 'OUTSIDE') {
 function startOrReset(climax = false) {
   sfx.unlock();
   dismountBike();
-  state.phase = 'PLAYING';
+  state.phase = climax ? 'PLAYING' : 'INTRO';
   state.timeLeft = climax ? 22 : totalRealSeconds;
   state.score = 0;
   state.delivered = 0;
@@ -572,17 +573,29 @@ function startOrReset(climax = false) {
   upgradeScreen.classList.add('hidden');
   gameoverScreen.classList.add('hidden');
   endingBannerEl.classList.add('hidden');
+  if (climax) introScreen.classList.add('hidden');
+  else introScreen.classList.remove('hidden');
   hud.classList.remove('hidden');
   sfx.startBGM(() => state.timeLeft < 25 || state.lionBuff > 0);
-  showToast(climax ? '⚡ 23:58 RỒI! SẮP ĐẾN GIAO THỪA!' : '🏃 Mẹ hối rồi! Từ nhà ra lấy Xe Đạp Đỏ mau!');
+  if (climax) showToast('⚡ 23:58 RỒI! SẮP ĐẾN GIAO THỪA!');
   updateUI();
 }
+
+function dismissIntro() {
+  if (state.phase !== 'INTRO') return;
+  introScreen.classList.add('hidden');
+  state.phase = 'PLAYING';
+  sfx.playBell();
+  showToast('🏃 Mẹ hối rồi! Từ nhà ra lấy Xe Đạp Đỏ mau!');
+}
+document.getElementById('btn-intro-go')?.addEventListener('click', dismissIntro);
 
 window.addEventListener('keydown', (e) => {
   keys[e.code] = true;
   if (e.code === 'Space') {
     e.preventDefault();
     if (state.phase === 'START') startOrReset(false);
+    else if (state.phase === 'INTRO') dismissIntro();
     else if (state.phase === 'PLAYING' && state.riding) {
       if (state.boostTimer <= 0) {
         state.boostTimer = 0.65;
