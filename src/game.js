@@ -718,7 +718,8 @@ function animate(now) {
     lions.forEach((l) => {
       l.cd = Math.max(0, l.cd - dt);
       l.x += l.speed * l.dir * dt;
-      if (l.x > halfX - 4 || l.x < -halfX + 4) l.dir *= -1;
+      if (l.x >= halfX - 4) { l.x = halfX - 4; l.dir = -1; }
+      else if (l.x <= -halfX + 4) { l.x = -halfX + 4; l.dir = 1; }
       l.lion.root.position.set(l.x, 0, l.z);
       l.lion.root.rotation.y = l.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
       l.lion.animateDance(now * 0.001);
