@@ -636,7 +636,7 @@ function updateUI() {
   if (!state.riding) orderEl.textContent = 'Bước 1: Đi bộ tới Xe Đạp Đỏ!';
   else if (state.returningHome) orderEl.textContent = '🏠 ĐÃ BIẾU ĐỦ 4 NHÀ! MAU VỀ NHÀ ĐÓN GIAO THỪA!';
   else if (state.orders.length > 0) {
-    const tag = state.warmth >= 75 ? '🔥 Nóng hổi (xCombo)' : (state.warmth >= 30 ? '♨️ Hơi nguội' : '❄️ Nguội ngắt (Mất Combo!)');
+    const tag = state.warmth >= 75 ? '🔥 Nóng hổi' : (state.warmth >= 30 ? '♨️ Hơi nguội' : '❄️ Nguội ngắt');
     orderEl.textContent = `Biếu ${state.orders[0].name} • ${tag}`;
   } else {
     orderEl.textContent = `Ghé Bếp Mẹ lấy bánh (${state.deliveredIds.size}/4 nhà)`;
@@ -875,15 +875,15 @@ function animate(now) {
             gained = Math.round(state.warmth * 2.5 * state.combo * mult * leafBonus);
             state.combo += 1;
             bonusTime = 5;
-            reaction = `🧧 ${t.name}: "${t.msg}" (+${gained}đ Lì Xì!)`;
+            reaction = `🧧 ${t.name}: "${t.msg}" (+${gained}đ Lì Xì)`;
           } else if (state.warmth >= 30) {
             gained = Math.round(state.warmth * 1.2 * mult);
             bonusTime = 3;
-            reaction = `♨️ ${t.name}: "Bánh hơi nguội rồi, lì xì nhẹ nha!" (+${gained}đ)`;
+            reaction = `♨️ ${t.name}: "Bánh hơi nguội rồi nè con, chúc năm mới vui vẻ!" (+${gained}đ Lì Xì)`;
           } else {
             state.combo = 1;
             gained = 20 * mult;
-            reaction = `❄️ ${t.name}: "Ôi bánh nguội ngắt rồi! Mất Combo!" (+${gained}đ)`;
+            reaction = `❄️ ${t.name}: "Ôi bánh nguội ngắt mất rồi, lần sau chạy nhanh hơn nha con!" (+${gained}đ Lì Xì)`;
           }
 
           state.score += gained; state.delivered += 1; state.deliveredIds.add(t.id);
