@@ -225,7 +225,48 @@ bicycle.add(banhChungProp);
 bicycle.position.set(BIKE_START.x, 0, BIKE_START.z);
 scene.add(bicycle);
 
-// Vòng & Quả cầu sáng opacity 0.28 bao quanh cơ thể Lan & xe đạp khi bật Trống Lân Hộ Thể!
+// Vòng Sao Choáng trên đầu Lan khi bị xe tông
+const stunHalo = new THREE.Group();
+stunHalo.position.set(0, 2.05, 0);
+for (let i = 0; i < 3; i++) {
+  const a = (i / 3) * Math.PI * 2;
+  const star = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.14),
+    new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+  );
+  star.position.set(Math.cos(a) * 0.45, 0, Math.sin(a) * 0.45);
+  stunHalo.add(star);
+}
+stunHalo.visible = false;
+tiltGroup.add(stunHalo);
+
+// Tóc Siêu Xayda vàng dựng ngược gắn vào xương đầu (hoặc đỉnh đầu) khi bật Trống Lân Hộ Thể!
+const saiyanHair = new THREE.Group();
+const hairMat = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfacc15, emissiveIntensity: 0.85 });
+[
+  [0, 0.28, 0, 0, 0, 0.48],
+  [0.18, 0.22, 0.08, 0.3, -0.4, 0.36],
+  [-0.18, 0.22, 0.08, 0.3, 0.4, 0.36],
+  [0.14, 0.2, -0.14, -0.45, -0.35, 0.38],
+  [-0.14, 0.2, -0.14, -0.45, 0.35, 0.38],
+  [0, 0.18, -0.2, -0.65, 0, 0.35],
+].forEach(([sx, sy, sz, rx, rz, h]) => {
+  const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, h, 5), hairMat);
+  spike.position.set(sx, sy, sz);
+  spike.rotation.set(rx, 0, rz);
+  saiyanHair.add(spike);
+});
+saiyanHair.visible = false;
+const headBone = student.getObjectByName('Head');
+if (headBone) {
+  saiyanHair.position.set(0, 0.18, 0);
+  headBone.add(saiyanHair);
+} else {
+  saiyanHair.position.set(0, 1.55, 0);
+  student.add(saiyanHair);
+}
+
+// Vòng & Quả cầu + Tia lửa Aura Siêu Xayda vàng rực bao quanh Lan khi bật Trống Lân Hộ Thể!
 const lionAura = new THREE.Group();
 const auraRing = new THREE.Mesh(
   new THREE.RingGeometry(1.5, 2.2, 24),
@@ -238,6 +279,17 @@ const auraSphere = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.28, depthWrite: false })
 );
 auraSphere.position.y = 1.05;
+const auraFlames = [];
+for (let i = 0; i < 6; i++) {
+  const a = (i / 6) * Math.PI * 2;
+  const flame = new THREE.Mesh(
+    new THREE.ConeGeometry(0.22, 1.35, 5),
+    new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xfde047 : 0xf97316, transparent: true, opacity: 0.72 })
+  );
+  flame.position.set(Math.cos(a) * 1.15, 0.75, Math.sin(a) * 1.15);
+  lionAura.add(flame);
+  auraFlames.push(flame);
+}
 lionAura.add(auraRing, auraSphere);
 lionAura.visible = false;
 playerRoot.add(lionAura);
@@ -257,14 +309,27 @@ const citySize = place.city?.size || [120, 90];
 const halfX = citySize[0] / 2 - 2;
 const halfZ = citySize[1] / 2 - 2;
 streetsZ.forEach((sz, idx) => {
+  const laneZ = sz + (idx % 2 === 0 ? 1.8 : -1.8);
   const carMesh = idx % 2 === 0 ? createTaxi() : createVan();
   scene.add(carMesh);
-  traffic.push({ mesh: carMesh, axis: 'x', fixed: sz + (idx % 2 === 0 ? 1.8 : -1.8), pos: (idx % 2 === 0 ? -halfX + 6 : halfX - 6), dir: idx % 2 === 0 ? 1 : -1, speed: 10, min: -halfX, max: halfX, fly: 0 });
+  traffic.push({ mesh: carMesh, axis: 'x', fixed: laneZ, pos: (idx % 2 === 0 ? -halfX + 6 : halfX - 6), dir: idx % 2 === 0 ? 1 : -1, speed: 10, min: -halfX, max: halfX, fly: 0, late: false });
+
+  // Xe tăng cường xuất hiện khi gần Giao Thừa (< 55% thời gian)
+  const rushMesh = idx % 2 === 0 ? createVan() : createTaxi();
+  rushMesh.visible = false;
+  scene.add(rushMesh);
+  traffic.push({ mesh: rushMesh, axis: 'x', fixed: sz + (idx % 2 === 0 ? -1.8 : 1.8), pos: (idx % 2 === 0 ? halfX - 8 : -halfX + 8), dir: idx % 2 === 0 ? -1 : 1, speed: 12.5, min: -halfX, max: halfX, fly: 0, late: true });
 });
 streetsX.slice(0, 2).forEach((sx, idx) => {
+  const laneX = sx + 1.8;
   const carMesh = idx % 2 === 0 ? createVan() : createTaxi();
   scene.add(carMesh);
-  traffic.push({ mesh: carMesh, axis: 'z', fixed: sx + 1.8, pos: -halfZ + 8 + idx * 14, dir: 1, speed: 9, min: -halfZ, max: halfZ, fly: 0 });
+  traffic.push({ mesh: carMesh, axis: 'z', fixed: laneX, pos: -halfZ + 8 + idx * 14, dir: 1, speed: 9, min: -halfZ, max: halfZ, fly: 0, late: false });
+
+  const rushMeshZ = idx % 2 === 0 ? createTaxi() : createVan();
+  rushMeshZ.visible = false;
+  scene.add(rushMeshZ);
+  traffic.push({ mesh: rushMeshZ, axis: 'z', fixed: sx - 1.8, pos: halfZ - 8 - idx * 12, dir: -1, speed: 12, min: -halfZ, max: halfZ, fly: 0, late: true });
 });
 
 const bikeLabel = createLabelEl('🚲 XE ĐẠP CỦA LAN');
@@ -593,7 +658,11 @@ function animate(now) {
       l.lion.animateDance(now * 0.001);
     });
 
+    const isRushHour = state.timeLeft < totalRealSeconds * 0.55;
+    const rushSpeedMult = state.timeLeft < 25 ? 1.3 : 1.0;
     traffic.forEach((c) => {
+      if (c.late) c.mesh.visible = isRushHour;
+      if (!c.mesh.visible) return;
       if (c.fly > 0) {
         c.fly -= dt;
         c.mesh.position.y = Math.sin((1 - c.fly) * Math.PI) * 14;
@@ -601,7 +670,7 @@ function animate(now) {
         if (c.fly <= 0) { c.mesh.position.y = 0; c.mesh.rotation.x = 0; }
         return;
       }
-      c.pos += c.speed * c.dir * dt;
+      c.pos += c.speed * rushSpeedMult * c.dir * dt;
       if (c.pos > c.max) c.pos = c.min;
       if (c.pos < c.min) c.pos = c.max;
       if (c.axis === 'x') { c.mesh.position.set(c.pos, 0, c.fixed); c.mesh.rotation.y = c.dir > 0 ? Math.PI / 2 : -Math.PI / 2; }
@@ -626,10 +695,15 @@ function animate(now) {
     state.stunTimer = Math.max(0, state.stunTimer - dt);
     state.hitCooldown = Math.max(0, state.hitCooldown - dt);
     lionAura.visible = state.lionBuff > 0;
+    saiyanHair.visible = state.lionBuff > 0;
     if (lionAura.visible) {
-      lionAura.rotation.y += 3.5 * dt;
-      auraSphere.scale.setScalar(1 + Math.sin(now * 0.01) * 0.06);
+      lionAura.rotation.y += 4.0 * dt;
+      auraSphere.scale.setScalar(1 + Math.sin(now * 0.012) * 0.08);
+      auraFlames.forEach((f, idx) => { f.scale.y = 0.85 + Math.sin(now * 0.018 + idx) * 0.35; });
     }
+
+    stunHalo.visible = state.stunTimer > 0;
+    if (stunHalo.visible) stunHalo.rotation.y += 7.5 * dt;
 
     if (state.orders.length > 0) {
       const coolRate = state.perks.leaf ? 1.5 : 3.2;
@@ -714,9 +788,9 @@ function animate(now) {
         }
       }
 
-      // Đụng Taxi: Có Hào Quang Lân -> Húc bay Taxi (+150đ)! Không có -> Bị xích ra & choáng 0.8s (không R.I.P)
+      // Đụng Taxi: Có Hào Quang Lân -> Húc bay Taxi (+150đ)! Không có -> Bị xích ra & hiện vòng sao choáng 0.75s
       for (const c of traffic) {
-        if (c.fly > 0) continue;
+        if (c.fly > 0 || !c.mesh.visible) continue;
         const dx = playerRoot.position.x - c.mesh.position.x;
         const dz = playerRoot.position.z - c.mesh.position.z;
         const dist = Math.hypot(dx, dz);
