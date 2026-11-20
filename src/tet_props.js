@@ -175,12 +175,12 @@ export function createFireworkSystem(scene) {
 
   function launch(cx, cz) {
     const col = fwColors[Math.floor(Math.random() * fwColors.length)];
-    const y = 14 + Math.random() * 10;
-    const x = cx + (Math.random() - 0.5) * 28;
-    const z = cz + (Math.random() - 0.5) * 28;
-    for (let i = 0; i < 28; i++) {
-      if (sparks.length > 220) break;
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.22, 6, 6), new THREE.MeshBasicMaterial({ color: col }));
+    const y = 22 + Math.random() * 10;
+    const x = cx + (Math.random() - 0.5) * 30;
+    const z = cz + (Math.random() - 0.5) * 24;
+    for (let i = 0; i < 32; i++) {
+      if (sparks.length > 260) break;
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.32, 6, 6), new THREE.MeshBasicMaterial({ color: col }));
       mesh.position.set(x, y, z);
       scene.add(mesh);
       const theta = Math.random() * Math.PI * 2;

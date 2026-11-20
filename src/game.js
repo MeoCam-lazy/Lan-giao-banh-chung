@@ -699,9 +699,10 @@ function animate(now) {
     camera.position.set(MOM_POS.x + Math.sin(orbit) * 20, 10.5, MOM_POS.z + Math.cos(orbit) * 20);
     camera.lookAt(MOM_POS.x, 1.5, MOM_POS.z);
   } else if (state.phase === 'ENDING' || state.phase === 'GAMEOVER') {
-    const camPos = new THREE.Vector3(playerRoot.position.x + 2.5, 2.4, playerRoot.position.z + 6.5);
-    camera.position.lerp(camPos, 3.5 * dt);
-    camera.lookAt(playerRoot.position.x, 11.5, playerRoot.position.z - 14);
+    // Đưa camera lên cao thoáng đãng, không bị nhà che, nhìn trọn Lan/Mẹ + Pháo hoa rực trời
+    const camPos = new THREE.Vector3(playerRoot.position.x + 12, 22, playerRoot.position.z + 24);
+    camera.position.lerp(camPos, 2.8 * dt);
+    camera.lookAt(playerRoot.position.x, 12, playerRoot.position.z - 6);
   } else {
     let yawDiff = playerRoot.rotation.y - smoothCamYaw;
     while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
