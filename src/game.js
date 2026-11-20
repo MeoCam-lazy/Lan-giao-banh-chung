@@ -16,7 +16,7 @@ let totalRealSeconds = 90;
 const HS_KEY = 'lan_banh_chung_hs';
 
 const UPGRADES = [
-  { id: 'kite', icon: '🪁', title: 'Cánh Diều Lướt Gió', desc: '+25% tốc độ đạp xe đi biếu bánh' },
+  { id: 'kite', icon: '⚡', title: 'Chân Thần Thức Tỉnh', desc: 'Lan mở khóa sức mạnh chạy 300km/h (+100% tốc độ & bốc khói!)' },
   { id: 'leaf', icon: '🌿', title: 'Lá Dong Giữ Nhiệt', desc: 'Bánh lâu nguội hơn 75% & +30% tiền Lì Xì khi còn nóng' },
   { id: 'drum', icon: '🥁', title: 'Trống Lân Hộ Thể', desc: 'Hào Quang Lân kéo dài 12 giây húc bay Taxi!' },
 ];
@@ -454,9 +454,9 @@ function openUpgradeMenu() {
         state.warmth = 100;
         showToast('🌿 LÁ DONG GIỮ NHIỆT! Bánh nóng 100% & lâu nguội!');
       } else {
-        state.boostTimer = 1.2;
+        state.boostTimer = 1.8;
         sfx.playBell();
-        showToast('🪁 CÁNH DIỀU LƯỚT GIÓ! +25% Tốc độ đạp xe!');
+        showToast('⚡ CHÂN THẦN THỨC TỈNH! ĐẠP XE 300KM/H BỐC KHÓI!');
       }
     };
     upgradeCardsEl.appendChild(btn);
@@ -667,6 +667,21 @@ function drawMinimap() {
   mmCtx.beginPath(); mmCtx.arc(px, pz, 4, 0, Math.PI * 2); mmCtx.fill();
 }
 
+// Hệ thống hạt khói khi đạp xe 300km/h (Chân Thần Thức Tỉnh / Boost)
+const smokePuffs = [];
+function spawnBikeSmoke(x, z, rotY, isGolden = false) {
+  if (smokePuffs.length > 60) return;
+  const puff = new THREE.Mesh(
+    new THREE.SphereGeometry(0.24 + Math.random() * 0.16, 7, 6),
+    new THREE.MeshBasicMaterial({ color: isGolden ? 0xfef08a : 0xe2e8f0, transparent: true, opacity: 0.72 })
+  );
+  const bx = x - Math.sin(rotY) * 1.1 + (Math.random() - 0.5) * 0.35;
+  const bz = z - Math.cos(rotY) * 1.1 + (Math.random() - 0.5) * 0.35;
+  puff.position.set(bx, 0.35, bz);
+  scene.add(puff);
+  smokePuffs.push({ mesh: puff, vy: 1.4 + Math.random() * 1.2, life: 0.55 });
+}
+
 let lastTime = performance.now();
 let forwardSpeed = 0;
 let smoothCamYaw = Math.PI;
@@ -771,11 +786,24 @@ function animate(now) {
       if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
     }
 
+    for (let i = smokePuffs.length - 1; i >= 0; i--) {
+      const sp = smokePuffs[i];
+      sp.life -= dt;
+      sp.mesh.position.y += sp.vy * dt;
+      sp.mesh.scale.addScalar(2.4 * dt);
+      sp.mesh.material.opacity = Math.max(0, sp.life * 1.2);
+      if (sp.life <= 0) { scene.remove(sp.mesh); smokePuffs.splice(i, 1); }
+    }
+
     state.boostTimer = Math.max(0, state.boostTimer - dt);
-    const kiteMult = state.perks.kite ? 1.25 : 1.0;
+    const kiteMult = state.perks.kite ? 2.0 : 1.0; // +100% tốc độ (300km/h!)
     const buffMult = state.lionBuff > 0 ? 1.25 : 1.0;
     const maxSpd = (state.riding ? (state.boostTimer > 0 ? 20 : 13.5) : 5.5) * kiteMult * buffMult;
     forwardSpeed = THREE.MathUtils.lerp(forwardSpeed, throttle * maxSpd, 7 * dt);
+
+    if (state.riding && Math.abs(forwardSpeed) > 6 && (state.perks.kite || state.boostTimer > 0) && Math.random() < 0.65) {
+      spawnBikeSmoke(playerRoot.position.x, playerRoot.position.z, playerRoot.rotation.y, state.perks.kite);
+    }
 
     playerRoot.rotation.y += steer * (state.riding ? 1.45 : 1.9) * dt;
     tiltGroup.rotation.z = state.riding ? THREE.MathUtils.lerp(tiltGroup.rotation.z, -steer * 0.22, 10 * dt) : 0;
