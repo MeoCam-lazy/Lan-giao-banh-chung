@@ -84,6 +84,46 @@ export function createBanhChungMesh() {
   return g;
 }
 
+// Cờ Đỏ Sao Vàng Việt Nam (ngôi sao 5 cánh thật 2 mặt)
+export function createVietnamFlag() {
+  const g = new THREE.Group();
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.035, 0.045, 3.2, 6),
+    new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.4 })
+  );
+  pole.position.y = 1.6;
+  g.add(pole);
+
+  const flagPivot = new THREE.Group();
+  flagPivot.position.set(0.65, 2.75, 0);
+  const cloth = new THREE.Mesh(
+    new THREE.BoxGeometry(1.25, 0.82, 0.04),
+    new THREE.MeshStandardMaterial({ color: 0xda251d, emissive: 0x7f1d1d, emissiveIntensity: 0.25 })
+  );
+  flagPivot.add(cloth);
+
+  const starShape = new THREE.Shape();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? 0.24 : 0.095;
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const sx = Math.cos(a) * r;
+    const sy = -Math.sin(a) * r;
+    if (i === 0) starShape.moveTo(sx, sy);
+    else starShape.lineTo(sx, sy);
+  }
+  starShape.closePath();
+  const starGeo = new THREE.ShapeGeometry(starShape);
+  const starMat = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+  [-0.025, 0.025].forEach((zOff) => {
+    const star = new THREE.Mesh(starGeo, starMat);
+    star.position.z = zOff;
+    flagPivot.add(star);
+  });
+
+  g.add(flagPivot);
+  return g;
+}
+
 // Nồi Bánh Chưng của Mẹ tại điểm lấy bánh
 export function createBanhChungPot(x, z) {
   const g = new THREE.Group();

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { sfx } from './audio.js';
-import { createBanhChungMesh, createBanhChungPot, createFireworkSystem, createLionDance, createTetGate, scatterTetDecor } from './tet_props.js';
+import { createBanhChungMesh, createBanhChungPot, createFireworkSystem, createLionDance, createVietnamFlag, scatterTetDecor } from './tet_props.js';
 import { buildKit } from '../assets/kit.mjs';
 import { stage } from '../assets/stage.mjs';
 import { animate as animateHumanoid } from '../assets/clips.mjs';
@@ -107,7 +107,10 @@ const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
 momNpc.position.set(MOM_POS.x - sideDir[0] * 1.1, 0, MOM_POS.z - sideDir[1] * 1.1);
 momNpc.rotation.set(0, homeLot.facing ?? 0, 0);
-scene.add(momNpc);
+const momFlag = createVietnamFlag();
+momFlag.position.set(MOM_POS.x - sideDir[0] * 1.8, 0, MOM_POS.z - sideDir[1] * 1.8);
+momFlag.rotation.y = homeLot.facing ?? 0;
+scene.add(momNpc, momFlag);
 
 const RELATIVES = [
   { name: 'Bà Ngoại', msg: 'Bánh còn nóng hổi! Ngoại mừng tuổi Lan nha!', color: 0x16a34a, hex: '#22c55e', isMale: false },
@@ -153,7 +156,10 @@ const houseMarkers = TEACHERS.map((t) => {
   if (!t.isMale) npc.scale.setScalar(1.06);
   npc.position.set(t.dropX, 0, t.dropZ);
   npc.lookAt(MOM_POS.x, 0, MOM_POS.z);
-  scene.add(beacon, pad, npc);
+
+  const flag = createVietnamFlag();
+  flag.position.set(t.dropX + 1.4, 0, t.dropZ + 0.8);
+  scene.add(beacon, pad, npc, flag);
   animateHumanoid(npc).then((a) => { if (a) { a.locomotion(0); npcAnims.push(a); } }).catch(() => {});
   return { beacon, pad };
 });
