@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tết Dân Gian Remix — Đạp Xe Giao Lộc &amp; Múa Lân</title>
+  <title>Lan Giao Bánh Chưng — Tết Dân Gian Remix</title>
   <link rel="stylesheet" href="./style.css" />
   <script type="importmap">
     {
@@ -22,23 +22,23 @@
   <div id="hud" class="hidden">
     <div class="hud-top">
       <div class="hud-card clock-card">
-        <span class="label">ĐÊM GIAO THỪA</span>
-        <span id="clock-display" class="value">23:50</span>
+        <span class="label">DEADLINE TẤT NIÊN</span>
+        <span id="clock-display" class="value">11:50</span>
         <span id="real-time-sub" class="sub">Còn 90s</span>
       </div>
 
       <div class="hud-card order-card">
-        <span class="label">LỄ VẬT SAU YÊN (<span id="bag-count">0/1</span>)</span>
-        <span id="order-display" class="value">Đi bộ tới chiếc Xe Đạp vàng!</span>
+        <span class="label">BÁNH CHƯNG SAU YÊN (<span id="bag-count">0/1</span>) • ĐỘ NÓNG</span>
+        <span id="order-display" class="value">Đi bộ tới chiếc Xe Đạp đỏ!</span>
         <div class="fresh-bar-wrap">
           <div id="fresh-bar" class="fresh-bar" style="width: 100%"></div>
         </div>
       </div>
 
       <div class="hud-card score-card">
-        <span class="label">LỘC TẾT / KỶ LỤC: <b id="high-score">0</b></span>
+        <span class="label">TIỀN LÌ XÌ / KỶ LỤC: <b id="high-score">0</b></span>
         <span id="score-display" class="value">0</span>
-        <span id="combo-display" class="sub">x1 • Đã chúc: 0</span>
+        <span id="combo-display" class="sub">x1 • Đã biếu: 0 nhà</span>
       </div>
     </div>
 
@@ -48,7 +48,7 @@
       <div class="controls-hint">
         <span><b>W/S</b> Tiến/Lùi</span>
         <span><b>A/D</b> Rẽ</span>
-        <span><b>Space</b> Chuông / Lì xì Lân</span>
+        <span><b>Space</b> Chuông / Gõ Trống Lân</span>
         <span><b>C</b> Đổi góc</span>
         <span><b>F2</b> Cao trào</span>
         <span><b>R</b> Chơi lại</span>
@@ -56,40 +56,49 @@
 
       <div class="minimap-wrap">
         <div class="minimap-header">
-          <span class="dot-live"></span> BẢN ĐỒ PHỐ TẾT (LÂN: CHẤM ĐỎ)
+          <span class="dot-live"></span> BẢN ĐỒ XÓM TẾT (LÂN: ĐỎ)
         </div>
         <canvas id="minimap" width="184" height="140"></canvas>
       </div>
     </div>
   </div>
 
+  <!-- Màn hình chọn Bùa Dân Gian -->
+  <div id="upgrade-screen" class="overlay hidden">
+    <div class="modal upgrade-modal">
+      <div class="badge">✨ BÙA PHÉP DÂN GIAN REMIX!</div>
+      <h2>CHỌN 1 BÙA HỘ THÂN</h2>
+      <div id="upgrade-cards" class="upgrade-grid"></div>
+    </div>
+  </div>
+
   <!-- Màn hình bắt đầu -->
   <div id="start-screen" class="overlay">
     <div class="modal">
-      <div class="badge">IT GAME JAM 2026 • CHỦ ĐỀ: DÂN GIAN REMIX</div>
-      <h1>🏮 TẾT DÂN GIAN REMIX 🦁</h1>
+      <div class="badge">IT GAME JAM 2026 • DÂN GIAN REMIX</div>
+      <h1>🥟 LAN GIAO BÁNH CHƯNG 🦁</h1>
       <p class="subtitle">
-        <b>23:50 Đêm Giao Thừa</b> — Phố hiện đại rực rỡ đèn lồng &amp; hoa đào! Hãy leo lên xe đạp giao <b>Bánh Chưng, Cành Đào, Bao Lì Xì</b> tới các nhà và gõ trống <b>Múa Lân</b> nhận Lộc!
+        <b>11:50 Trưa 29 Tết!</b> Mẹ vừa vớt xong nồi bánh chưng và giao deadline: Mau đạp xe đi biếu <b>Bà Ngoại, Bác Hai, Cô Ba, Cậu Tư</b> trước giờ cúng Tất Niên <b>12:00</b>!
       </p>
       <div class="rules-grid">
-        <div class="rule-item"><span>🚲</span> Đi bộ ra xe đạp $\rightarrow$ Ghé <b>Sảnh Tết</b> nhận lễ vật chở sau yên</div>
-        <div class="rule-item"><span>🦁</span> Gặp <b>Đoàn Múa Lân</b> trên phố: Bấm <b>Space</b> nhận <i>Lộc x2 &amp; Pháo hoa</i>!</div>
-        <div class="rule-item"><span>🚕</span> Né Taxi &amp; Xe tải kẻo rớt độ nguyên vẹn của lễ vật</div>
+        <div class="rule-item"><span>🥟</span> Ghé <b>Bếp Mẹ</b> lấy cặp Bánh Chưng nóng chở sau yên xe đi biếu họ hàng</div>
+        <div class="rule-item"><span>🦁</span> Gặp <b>Đoàn Múa Lân</b>: Bấm <b>Space</b> bật <i>Hào Quang Lân</i> húc bay Taxi (+150đ)!</div>
+        <div class="rule-item"><span>🚕</span> Bình thường đụng Taxi/Xe tải là <b>R.I.P</b> — trừ khi đang có Hào Quang Lân!</div>
       </div>
-      <button id="btn-start" class="btn-primary">KHAI XUÂN LÊN ĐƯỜNG (SPACE)</button>
-      <div class="credit">3D Street Kit: Polyfork (CC BY 4.0) • Procedural Tết Props &amp; Lion Dance</div>
+      <button id="btn-start" class="btn-primary">CHẠY DEADLINE CHO MẸ (SPACE)</button>
+      <div class="credit">3D Street Kit: Polyfork (CC BY 4.0) • Cây Nêu, Múa Lân &amp; Bánh Chưng</div>
     </div>
   </div>
 
   <!-- Màn hình kết thúc -->
   <div id="gameover-screen" class="overlay hidden">
     <div class="modal">
-      <div class="badge">🎆 00:00 — CHÚC MỪNG NĂM MỚI!</div>
-      <h2>HOÀN THÀNH CHUYẾN XE LỘC TẾT!</h2>
+      <div id="go-badge" class="badge">🎆 12:00 — ĐẾN GIỜ CÚNG TẤT NIÊN!</div>
+      <h2 id="go-title">HOÀN THÀNH DEADLINE CỦA MẸ!</h2>
       <div class="stats-box">
-        <div><span>Tổng điểm Lộc Tết:</span> <b id="final-score">0</b></div>
+        <div><span>Tổng tiền Lì Xì:</span> <b id="final-score">0</b></div>
         <div><span>Kỷ lục cao nhất:</span> <b id="final-best">0</b></div>
-        <div><span>Số nhà đã chúc Tết:</span> <b id="final-delivered">0</b></div>
+        <div><span>Số nhà đã biếu bánh:</span> <b id="final-delivered">0</b></div>
         <div><span>Combo cao nhất:</span> <b id="final-combo">x1</b></div>
       </div>
       <button id="btn-restart" class="btn-primary">CHƠI LẠI NGAY (R)</button>
