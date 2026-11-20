@@ -53,5 +53,12 @@ class SoundFX {
     setTimeout(() => this._tone(b * 1.5, 0.22, 'triangle', 0.2), 160);
   }
   playHit() { this._tone(160, 0.22, 'sawtooth', 0.22, 55); }
+  playFirework() {
+    this._tone(240, 0.25, 'sine', 0.12, 720);
+    setTimeout(() => {
+      this._tone(120, 0.3, 'sawtooth', 0.18, 45);
+      this._tone(980, 0.18, 'triangle', 0.1, 420);
+    }, 240);
+  }
 }
 export const sfx = new SoundFX();

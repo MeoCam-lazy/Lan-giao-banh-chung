@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { sfx } from './audio.js';
-import { createBanhChungMesh, createBanhChungPot, createLionDance, scatterTetDecor } from './tet_props.js';
+import { createBanhChungMesh, createBanhChungPot, createFireworkSystem, createLionDance, createTetGate, scatterTetDecor } from './tet_props.js';
 import { buildKit } from '../assets/kit.mjs';
 import { stage } from '../assets/stage.mjs';
 import { animate as animateHumanoid } from '../assets/clips.mjs';
@@ -26,6 +26,9 @@ const state = {
   score: 0,
   highScore: Number(localStorage.getItem(HS_KEY) || 0),
   delivered: 0,
+  deliveredIds: new Set(), // Đánh dấu 4 nhà đã biếu đủ
+  returningHome: false,    // Đã biếu đủ 4 nhà -> Đạp xe về nhà đón Giao Thừa!
+  fireworkTimer: 0,
   nextUpgradeAt: 2,
   combo: 1,
   maxCombo: 1,
@@ -83,7 +86,9 @@ const HOME_POS = { x: homeSpot.x, z: homeSpot.z };
 const BIKE_START = place.openSpot({ near: new THREE.Vector3(homeSpot.x + 3.8, 0, homeSpot.z + 2.0) });
 const MOM_POS = place.openSpot({ near: new THREE.Vector3(homeSpot.x - 3.5, 0, homeSpot.z - 2.5) });
 
-// Nồi Bánh Chưng của Mẹ & Nhân vật Mẹ đứng cạnh
+// Nồi Bánh Chưng, Cổng Chào Tết Đỏ Vàng & Nhân vật Mẹ đứng cạnh
+const fireworks = createFireworkSystem(scene);
+scene.add(createTetGate(MOM_POS.x, MOM_POS.z - 2.2));
 scene.add(createBanhChungPot(MOM_POS.x + 1.3, MOM_POS.z));
 const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
@@ -316,17 +321,34 @@ function openUpgradeMenu() {
   upgradeScreen.classList.remove('hidden');
 }
 
-function endGame(crashed = false) {
+function endGame(mode = 'OUTSIDE') {
+  // mode: 'HAPPY' (Về nhà kịp 00:00) | 'OUTSIDE' (Xem pháo hoa ngoài đường) | 'CRASH' (Tai nạn)
   state.phase = 'GAMEOVER';
   sfx.stopBGM();
+  if (mode !== 'CRASH') {
+    state.fireworkTimer = 6.0;
+    for (let i = 0; i < 4; i++) setTimeout(() => { fireworks.launch(playerRoot.position.x, playerRoot.position.z); sfx.playFirework(); }, i * 550);
+  }
   if (state.score > state.highScore) { state.highScore = state.score; localStorage.setItem(HS_KEY, String(state.highScore)); }
   hud.classList.add('hidden');
   gameoverScreen.classList.remove('hidden');
-  document.getElementById('go-badge').textContent = crashed ? '💥 TAI NẠN GIAO THÔNG!' : '🎆 00:00 — CHÚC MỪNG NĂM MỚI!';
-  document.getElementById('go-title').textContent = crashed ? 'BỊ XE ĐỤNG RỒI — R.I.P! 💀' : 'HOÀN THÀNH DEADLINE GIAO THỪA!';
+
+  const badgeEl = document.getElementById('go-badge');
+  const titleEl = document.getElementById('go-title');
+  if (mode === 'CRASH') {
+    badgeEl.textContent = '💥 TAI NẠN ĐÊM 30 TẾT!';
+    titleEl.textContent = 'BỊ XE ĐỤNG RỒI — R.I.P! 💀';
+  } else if (mode === 'HAPPY') {
+    badgeEl.textContent = '🎆 00:00 — HAPPY ENDING CÙNG GIA ĐÌNH!';
+    titleEl.textContent = 'KỊP VỀ NHÀ ĐÓN GIAO THỪA VỚI MẸ! ❤️';
+  } else {
+    badgeEl.textContent = '🎇 00:00 RỒI — HẾT GIỜ GIAO THỪA!';
+    titleEl.textContent = 'LAN XEM PHÁO HOA MỘT MÌNH NGOÀI ĐƯỜNG!';
+  }
+
   document.getElementById('final-score').textContent = state.score;
   document.getElementById('final-best').textContent = state.highScore;
-  document.getElementById('final-delivered').textContent = state.delivered;
+  document.getElementById('final-delivered').textContent = `${state.deliveredIds.size}/4`;
   document.getElementById('final-combo').textContent = `x${state.maxCombo}`;
   updateUI();
 }
@@ -338,6 +360,9 @@ function startOrReset(climax = false) {
   state.timeLeft = climax ? 22 : TOTAL_REAL_SECONDS;
   state.score = 0;
   state.delivered = 0;
+  state.deliveredIds = new Set();
+  state.returningHome = false;
+  state.fireworkTimer = 0;
   state.nextUpgradeAt = 2;
   state.combo = 1;
   state.maxCombo = 1;
@@ -400,11 +425,13 @@ function updateUI() {
   clockEl.textContent = mins >= 60 ? '00:00:00' : `23:${String(mins).padStart(2, '0')}:${String(totalSec % 60).padStart(2, '0')}`;
   realSubEl.textContent = state.lionBuff > 0 ? `🦁 HÚC TAXI (${state.lionBuff.toFixed(1)}s)` : `Còn ${Math.ceil(state.timeLeft)}s thực tế`;
   bagCountEl.textContent = `${state.orders.length}/1`;
-  orderEl.textContent = !state.riding ? 'Bước 1: Đi bộ tới Xe Đạp Đỏ!' : (state.orders.length > 0 ? `Biếu Bánh Chưng: ${state.orders[0].name}` : 'Ghé Bếp Mẹ lấy cặp Bánh Chưng nóng!');
+  if (!state.riding) orderEl.textContent = 'Bước 1: Đi bộ tới Xe Đạp Đỏ!';
+  else if (state.returningHome) orderEl.textContent = '🏠 ĐÃ BIẾU ĐỦ 4 NHÀ! MAU VỀ NHÀ ĐÓN GIAO THỪA!';
+  else orderEl.textContent = state.orders.length > 0 ? `Biếu Bánh Chưng: ${state.orders[0].name}` : `Ghé Bếp Mẹ lấy bánh (${state.deliveredIds.size}/4 nhà)`;
   freshBar.style.width = `${Math.max(0, state.warmth)}%`;
   scoreEl.textContent = state.score;
   highScoreEl.textContent = state.highScore;
-  comboEl.textContent = `x${state.combo} • Đã biếu: ${state.delivered} nhà`;
+  comboEl.textContent = `x${state.combo} • Đã biếu: ${state.deliveredIds.size}/4 nhà`;
 }
 
 function drawMinimap() {
@@ -484,6 +511,12 @@ function animate(now) {
     });
   }
 
+  fireworks.update(dt);
+  if (state.fireworkTimer > 0) {
+    state.fireworkTimer -= dt;
+    if (Math.random() < 0.04) { fireworks.launch(playerRoot.position.x, playerRoot.position.z); sfx.playFirework(); }
+  }
+
   if (state.phase === 'PLAYING') {
     state.timeLeft -= dt;
     state.lionBuff = Math.max(0, state.lionBuff - dt);
@@ -495,7 +528,7 @@ function animate(now) {
       state.warmth = Math.max(25, state.warmth - coolRate * dt);
     }
 
-    if (state.timeLeft <= 0) { state.timeLeft = 0; endGame(false); }
+    if (state.timeLeft <= 0) { state.timeLeft = 0; endGame('OUTSIDE'); }
 
     let throttle = 0; let steer = 0;
     if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
@@ -530,13 +563,22 @@ function animate(now) {
 
     if (state.riding) {
       state.pickupCooldown = Math.max(0, state.pickupCooldown - dt);
-      if (Math.hypot(playerRoot.position.x - MOM_POS.x, playerRoot.position.z - MOM_POS.z) < 3.8 && state.orders.length < 1 && state.pickupCooldown <= 0) {
-        const picked = TEACHERS[Math.floor(Math.random() * TEACHERS.length)];
-        state.orders.push(picked);
-        state.warmth = 100;
-        state.pickupCooldown = 0.7;
-        syncMarkers(); sfx.playPickup();
-        showToast(`🥟 Mẹ dặn: Mang cặp bánh nóng sang biếu ${picked.name} mau!`);
+      const distMom = Math.hypot(playerRoot.position.x - MOM_POS.x, playerRoot.position.z - MOM_POS.z);
+
+      // Nếu đã biếu đủ 4 nhà và đạp về tới nhà trước 00:00 -> HAPPY ENDING!
+      if (state.returningHome && distMom < 4.2) {
+        state.score += Math.round(state.timeLeft * 20);
+        endGame('HAPPY');
+      } else if (!state.returningHome && distMom < 3.8 && state.orders.length < 1 && state.pickupCooldown <= 0) {
+        const remaining = TEACHERS.filter((t) => !state.deliveredIds.has(t.id));
+        const picked = remaining[Math.floor(Math.random() * remaining.length)];
+        if (picked) {
+          state.orders.push(picked);
+          state.warmth = 100;
+          state.pickupCooldown = 0.7;
+          syncMarkers(); sfx.playPickup();
+          showToast(`🥟 Mẹ dặn: Mang bánh nóng sang biếu ${picked.name} mau!`);
+        }
       }
 
       for (let i = state.orders.length - 1; i >= 0; i--) {
@@ -544,14 +586,20 @@ function animate(now) {
         if (Math.hypot(playerRoot.position.x - t.dropX, playerRoot.position.z - t.dropZ) < 3.8) {
           const mult = state.lionBuff > 0 ? 2 : 1;
           const gained = Math.round(state.warmth * 2.2 * state.combo * mult);
-          state.score += gained; state.delivered += 1; state.combo += 1;
+          state.score += gained; state.delivered += 1; state.deliveredIds.add(t.id); state.combo += 1;
           state.maxCombo = Math.max(state.maxCombo, state.combo);
           state.timeLeft = Math.min(TOTAL_REAL_SECONDS, state.timeLeft + 4);
           state.orders.splice(i, 1);
           syncMarkers(); sfx.playDeliver(state.combo);
           spawnEmojis(t.dropX, t.dropZ);
-          showToast(`🧧 ${t.name}: "${t.msg}" (+${gained}đ)`);
-          if (state.delivered >= state.nextUpgradeAt) { state.nextUpgradeAt += 2; openUpgradeMenu(); }
+
+          if (state.deliveredIds.size >= TEACHERS.length) {
+            state.returningHome = true;
+            showToast(`🎉 Đã biếu đủ 4 nhà! Mau về Nhà Mẹ đón Giao Thừa trước 00:00!`);
+          } else {
+            showToast(`🧧 ${t.name}: "${t.msg}" (+${gained}đ)`);
+            if (state.delivered >= state.nextUpgradeAt) { state.nextUpgradeAt += 2; openUpgradeMenu(); }
+          }
           break;
         }
       }
@@ -571,7 +619,7 @@ function animate(now) {
           } else {
             state.trauma = 1.0;
             sfx.playHit();
-            endGame(true);
+            endGame('CRASH');
             break;
           }
         }
