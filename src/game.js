@@ -584,27 +584,29 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (state.phase === 'START') startOrReset(false);
     else if (state.phase === 'PLAYING' && state.riding) {
-      const nearLion = lions.find((l) => l.cd <= 0 && Math.hypot(playerRoot.position.x - l.x, playerRoot.position.z - l.z) < 8.0);
-      if (nearLion) {
-        nearLion.cd = 10;
-        state.lionBuff = state.perks.drum ? 12 : 8;
-        state.warmth = 100;
-        state.score += 200;
-        sfx.playLionDrum();
-        spawnEmojis(nearLion.x, nearLion.z, ['🦁', '🧧', '🎆', '🔥', '💰']);
-        showToast('🦁 HÀO QUANG LÂN! HÚC BAY TAXI & HÂM NÓNG BÁNH!');
-      } else if (state.boostTimer <= 0) {
-        state.boostTimer = 0.5;
+      if (state.boostTimer <= 0) {
+        state.boostTimer = 0.65;
         sfx.playBell();
       }
     }
   }
   if (e.code === 'KeyR' && state.phase !== 'START') startOrReset(false);
-  if (e.code === 'KeyM') showToast(sfx.toggleMute() ? '🔇 Tắt âm' : '🔊 Bật âm');
+  if (e.code === 'KeyM') {
+    const muted = sfx.toggleMute();
+    const muteBtn = document.getElementById('btn-mute');
+    if (muteBtn) muteBtn.textContent = muted ? '🔇' : '🔊';
+    showToast(muted ? '🔇 Tắt âm' : '🔊 Bật âm');
+  }
   if (e.code === 'KeyC') { state.camMode = (state.camMode + 1) % 2; showToast(state.camMode === 0 ? '📷 Góc sau lưng' : '📷 Góc trên cao'); }
   if (e.code === 'F2') startOrReset(true);
 });
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+document.getElementById('btn-mute')?.addEventListener('click', (e) => {
+  const muted = sfx.toggleMute();
+  e.currentTarget.textContent = muted ? '🔇' : '🔊';
+  e.currentTarget.blur();
+  showToast(muted ? '🔇 Tắt âm' : '🔊 Bật âm');
+});
 document.querySelectorAll('.diff-btn').forEach((btn) => {
   btn.onclick = () => {
     document.querySelectorAll('.diff-btn').forEach((b) => b.classList.remove('active'));
@@ -723,7 +725,21 @@ function animate(now) {
       l.lion.root.position.set(l.x, 0, l.z);
       l.lion.root.rotation.y = l.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
       l.lion.animateDance(now * 0.001);
+      if (state.phase === 'PLAYING' && state.riding && l.cd <= 0 && Math.hypot(playerRoot.position.x - l.x, playerRoot.position.z - l.z) < 3.6) {
+        l.cd = 10;
+        state.lionBuff = state.perks.drum ? 12 : 8;
+        state.warmth = 100;
+        state.score += 200;
+        sfx.playLionDrum();
+        spawnEmojis(l.x, l.z, ['🦁', '🧧', '🎆', '🔥', '💰']);
+        showToast('🦁 HÀO QUANG LÂN! HÚC BAY TAXI & HÂM NÓNG BÁNH!');
+      }
     });
+
+    const ringPulse = 1 + Math.sin(now * 0.006) * 0.08;
+    shopRing.scale.setScalar(ringPulse);
+    bikeRing.scale.setScalar(ringPulse);
+    targets.forEach((t) => t.pad?.scale.setScalar(ringPulse));
 
     const isRushHour = state.timeLeft < totalRealSeconds * 0.55;
     const rushSpeedMult = state.timeLeft < 25 ? 1.3 : 1.0;
