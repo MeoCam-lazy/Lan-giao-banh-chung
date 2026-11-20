@@ -253,31 +253,26 @@ for (let i = 0; i < 3; i++) {
 stunHalo.visible = false;
 tiltGroup.add(stunHalo);
 
-// Tóc Siêu Xayda vàng dựng ngược gắn vào xương đầu (hoặc đỉnh đầu) khi bật Trống Lân Hộ Thể!
+// Tóc Siêu Xayda vàng dựng ngược gắn trực tiếp vào tiltGroup trên đỉnh đầu Lan (không bị lọt vào đầu!)
 const saiyanHair = new THREE.Group();
-const hairMat = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfacc15, emissiveIntensity: 0.85 });
+const hairMat = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfacc15, emissiveIntensity: 1.0 });
 [
-  [0, 0.28, 0, 0, 0, 0.48],
-  [0.18, 0.22, 0.08, 0.3, -0.4, 0.36],
-  [-0.18, 0.22, 0.08, 0.3, 0.4, 0.36],
-  [0.14, 0.2, -0.14, -0.45, -0.35, 0.38],
-  [-0.14, 0.2, -0.14, -0.45, 0.35, 0.38],
-  [0, 0.18, -0.2, -0.65, 0, 0.35],
+  [0, 0.25, 0, -0.2, 0, 0.65],
+  [0.2, 0.2, 0.05, 0.2, -0.5, 0.52],
+  [-0.2, 0.2, 0.05, 0.2, 0.5, 0.52],
+  [0.16, 0.16, -0.15, -0.55, -0.4, 0.54],
+  [-0.16, 0.16, -0.15, -0.55, 0.4, 0.54],
+  [0, 0.14, -0.22, -0.75, 0, 0.5],
+  [0, 0.22, 0.16, 0.45, 0, 0.48],
 ].forEach(([sx, sy, sz, rx, rz, h]) => {
-  const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, h, 5), hairMat);
+  const spike = new THREE.Mesh(new THREE.ConeGeometry(0.14, h, 5), hairMat);
   spike.position.set(sx, sy, sz);
   spike.rotation.set(rx, 0, rz);
   saiyanHair.add(spike);
 });
+saiyanHair.position.set(0, 1.88, -0.1);
 saiyanHair.visible = false;
-const headBone = student.getObjectByName('Head');
-if (headBone) {
-  saiyanHair.position.set(0, 0.18, 0);
-  headBone.add(saiyanHair);
-} else {
-  saiyanHair.position.set(0, 1.55, 0);
-  student.add(saiyanHair);
-}
+tiltGroup.add(saiyanHair);
 
 // Vòng & Quả cầu + Tia lửa Aura Siêu Xayda vàng rực bao quanh Lan khi bật Trống Lân Hộ Thể!
 const lionAura = new THREE.Group();
@@ -685,8 +680,16 @@ function animate(now) {
       if (c.fly > 0) {
         c.fly -= dt;
         c.mesh.position.y = Math.sin((1 - c.fly) * Math.PI) * 14;
+        c.mesh.position.x += (c.flyVx || 0) * dt;
+        c.mesh.position.z += (c.flyVz || 0) * dt;
         c.mesh.rotation.x += 10 * dt;
-        if (c.fly <= 0) { c.mesh.position.y = 0; c.mesh.rotation.x = 0; }
+        c.mesh.rotation.z += 6 * dt;
+        if (c.fly <= 0) {
+          c.mesh.position.y = 0;
+          c.mesh.rotation.set(0, 0, 0);
+          // Respawn xe về lại đầu đường (không rơi xuống ngay chỗ cũ để tránh farm điểm!)
+          c.pos = c.dir > 0 ? c.min : c.max;
+        }
         return;
       }
       c.pos += c.speed * rushSpeedMult * c.dir * dt;
@@ -835,6 +838,10 @@ function animate(now) {
         if (dist < 2.35 && dist > 0.001) {
           if (state.lionBuff > 0) {
             c.fly = 1.0;
+            // Húc xe bay chếch lên trời ra xa, xong respawn về đầu đường
+            const pushA = Math.atan2(c.mesh.position.z - playerRoot.position.z, c.mesh.position.x - playerRoot.position.x);
+            c.flyVx = Math.cos(pushA) * 24;
+            c.flyVz = Math.sin(pushA) * 24;
             state.score += 150;
             state.trauma = 0.5;
             sfx.playLionDrum();
