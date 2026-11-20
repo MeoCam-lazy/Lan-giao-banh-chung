@@ -35,6 +35,8 @@ const state = {
   orders: [],
   warmth: 100, // Độ nóng của Bánh Chưng (nguội dần theo thời gian!)
   lionBuff: 0, // Hào Quang Lân húc bay Taxi!
+  stunTimer: 0, // Choáng nhẹ khi đụng xe
+  hitCooldown: 0,
   pickupCooldown: 0,
   boostTimer: 0,
   trauma: 0,
@@ -86,9 +88,8 @@ const HOME_POS = { x: homeSpot.x, z: homeSpot.z };
 const BIKE_START = place.openSpot({ near: new THREE.Vector3(homeSpot.x + 3.8, 0, homeSpot.z + 2.0) });
 const MOM_POS = place.openSpot({ near: new THREE.Vector3(homeSpot.x - 3.5, 0, homeSpot.z - 2.5) });
 
-// Nồi Bánh Chưng, Cổng Chào Tết Đỏ Vàng & Nhân vật Mẹ đứng cạnh
+// Nồi Bánh Chưng & Nhân vật Mẹ đứng ở nhà đưa bánh cho Lan (bỏ cổng chào cho thoáng)
 const fireworks = createFireworkSystem(scene);
-scene.add(createTetGate(MOM_POS.x, MOM_POS.z - 2.2));
 scene.add(createBanhChungPot(MOM_POS.x + 1.3, MOM_POS.z));
 const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
@@ -369,6 +370,8 @@ function startOrReset(climax = false) {
   state.orders = [];
   state.warmth = 100;
   state.lionBuff = 0;
+  state.stunTimer = 0;
+  state.hitCooldown = 0;
   state.pickupCooldown = 0;
   state.boostTimer = 0;
   state.trauma = 0;
@@ -520,6 +523,8 @@ function animate(now) {
   if (state.phase === 'PLAYING') {
     state.timeLeft -= dt;
     state.lionBuff = Math.max(0, state.lionBuff - dt);
+    state.stunTimer = Math.max(0, state.stunTimer - dt);
+    state.hitCooldown = Math.max(0, state.hitCooldown - dt);
     lionAura.visible = state.lionBuff > 0;
     if (lionAura.visible) lionAura.rotation.z += 4 * dt;
 
@@ -531,10 +536,12 @@ function animate(now) {
     if (state.timeLeft <= 0) { state.timeLeft = 0; endGame('OUTSIDE'); }
 
     let throttle = 0; let steer = 0;
-    if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
-    if (keys['KeyS'] || keys['ArrowDown']) throttle -= 0.5;
-    if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
-    if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+    if (state.stunTimer <= 0) {
+      if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+      if (keys['KeyS'] || keys['ArrowDown']) throttle -= 0.5;
+      if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+      if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+    }
 
     state.boostTimer = Math.max(0, state.boostTimer - dt);
     const kiteMult = state.perks.kite ? 1.25 : 1.0;
@@ -604,11 +611,13 @@ function animate(now) {
         }
       }
 
-      // Đụng Taxi: Nếu có Hào Quang Lân -> Húc bay Taxi (+150đ)! Không có -> R.I.P!
+      // Đụng Taxi: Có Hào Quang Lân -> Húc bay Taxi (+150đ)! Không có -> Bị xích ra & choáng 0.8s (không R.I.P)
       for (const c of traffic) {
         if (c.fly > 0) continue;
-        const dist = Math.hypot(playerRoot.position.x - c.mesh.position.x, playerRoot.position.z - c.mesh.position.z);
-        if (dist < 2.2) {
+        const dx = playerRoot.position.x - c.mesh.position.x;
+        const dz = playerRoot.position.z - c.mesh.position.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist < 2.35 && dist > 0.001) {
           if (state.lionBuff > 0) {
             c.fly = 1.0;
             state.score += 150;
@@ -617,11 +626,24 @@ function animate(now) {
             spawnEmojis(c.mesh.position.x, c.mesh.position.z, ['💥', '🚕', '🦁', '✨']);
             showToast('🦁 HÚC BAY TAXI! +150đ Lộc Lân!');
           } else {
-            state.trauma = 1.0;
-            sfx.playHit();
-            endGame('CRASH');
-            break;
+            playerRoot.position.x += (dx / dist) * (2.35 - dist);
+            playerRoot.position.z += (dz / dist) * (2.35 - dist);
+            forwardSpeed = -5.5;
+            if (state.hitCooldown <= 0) {
+              state.hitCooldown = 1.1;
+              state.stunTimer = 0.75;
+              state.trauma = 0.85;
+              sfx.playHit();
+              if (state.orders.length > 0) {
+                state.warmth = Math.max(25, state.warmth - 25);
+                state.combo = 1;
+                showToast('💫 Choáng váng! Nguội mất 25% bánh!', true);
+              } else {
+                showToast('💫 Suýt tông xe! Cẩn thận đường Tết đông!', true);
+              }
+            }
           }
+          break;
         }
       }
     }
