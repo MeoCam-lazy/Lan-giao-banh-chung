@@ -90,15 +90,23 @@ const lots = place.city?.lots || [];
 const homeLot = lots.find((l) => Math.hypot(l.door[0], l.door[1]) < 28) || lots[0] || { door: [0, -5], facing: 0 };
 const MOM_POS = { x: homeLot.door[0], z: homeLot.door[1] };
 const sideDir = Math.abs(Math.sin(homeLot.facing || 0)) > 0.5 ? [0, 1] : [1, 0];
-const HOME_POS = { x: MOM_POS.x + sideDir[0] * 2.5, z: MOM_POS.z + sideDir[1] * 2.5 };
-const BIKE_START = { x: MOM_POS.x - sideDir[0] * 2.8, z: MOM_POS.z - sideDir[1] * 2.8 };
+const HOME_POS = { x: MOM_POS.x + sideDir[0] * 2.2, z: MOM_POS.z + sideDir[1] * 2.2 };
+// Đặt Xe Đạp ở vỉa hè phía bên kia đường (cách Bếp Mẹ 10-16m) để Lan đi bộ qua lấy rồi quay lại!
+const bikeLot = lots.find((l) => {
+  const d = Math.hypot(l.door[0] - MOM_POS.x, l.door[1] - MOM_POS.z);
+  return d > 10 && d < 20;
+});
+const BIKE_START = bikeLot
+  ? { x: bikeLot.door[0], z: bikeLot.door[1] }
+  : { x: MOM_POS.x + 11, z: MOM_POS.z + 9 };
 
 // Nồi Bánh Chưng & Nhân vật Mẹ đứng ở nhà đưa bánh cho Lan (bỏ cổng chào cho thoáng)
 const fireworks = createFireworkSystem(scene);
 scene.add(createBanhChungPot(MOM_POS.x + 1.3, MOM_POS.z));
 const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
-momNpc.position.set(MOM_POS.x - 1.2, 0, MOM_POS.z);
+momNpc.position.set(MOM_POS.x - sideDir[0] * 1.1, 0, MOM_POS.z - sideDir[1] * 1.1);
+momNpc.lookAt(HOME_POS.x, 0, HOME_POS.z);
 scene.add(momNpc);
 
 const RELATIVES = [
@@ -742,9 +750,10 @@ function animate(now) {
     if (state.phase === 'START' || state.phase === 'ENDING' || state.phase === 'GAMEOVER' || (ln.id === -2 && state.riding)) { ln.el.style.display = 'none'; return; }
     proj.set(ln.x, ln.y, ln.z).project(camera);
     if (proj.z > 1) { ln.el.style.display = 'none'; return; }
+    const sx = (proj.x * 0.5 + 0.5) * window.innerWidth;
+    const sy = (-proj.y * 0.5 + 0.5) * window.innerHeight;
     ln.el.style.display = 'block';
-    ln.el.style.left = `${(proj.x * 0.5 + 0.5) * window.innerWidth}px`;
-    ln.el.style.top = `${(-proj.y * 0.5 + 0.5) * window.innerHeight}px`;
+    ln.el.style.transform = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0) translate(-50%, -100%)`;
   });
 
   renderer.render(scene, camera);

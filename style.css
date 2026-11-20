@@ -4,7 +4,9 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
 
 .world-label {
   position: absolute;
-  transform: translate(-50%, -100%);
+  top: 0;
+  left: 0;
+  will-change: transform;
   background: rgba(127, 29, 29, 0.9);
   border: 1.5px solid rgba(250, 204, 21, 0.65);
   color: #fef08a;
@@ -19,7 +21,6 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
   border-color: #fde047;
   background: linear-gradient(90deg, #e11d48, #d97706);
   color: #fff;
-  transform: translate(-50%, -100%) scale(1.14);
 }
 
 .floating-heart {
