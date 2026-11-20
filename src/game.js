@@ -101,14 +101,14 @@ const BIKE_START = bikeLot
   ? { x: bikeLot.door[0], z: bikeLot.door[1] }
   : { x: MOM_POS.x + 11, z: MOM_POS.z + 9 };
 
-// Hạ 2 tay Mẹ xuôi theo thân (hết T-pose và đứng thẳng tự nhiên)
-function poseStandingRelaxed(npc) {
+// Hạ 2 tay xuôi theo thân (hết T-pose và đứng thẳng tự nhiên)
+function poseStandingRelaxed(npc, wave = 0) {
   const lA = npc.getObjectByName('LeftArm');
   const rA = npc.getObjectByName('RightArm');
   const lF = npc.getObjectByName('LeftForeArm');
   const rF = npc.getObjectByName('RightForeArm');
   if (lA) lA.rotation.set(0.08, 0, -1.28);
-  if (rA) rA.rotation.set(0.08, 0, 1.28);
+  if (rA) rA.rotation.set(0.08, 0, 1.28 + wave);
   if (lF) lF.rotation.set(0, 0, -0.18);
   if (rF) rF.rotation.set(0, 0, 0.18);
 }
@@ -120,7 +120,7 @@ const momNpc = createStudent({ bag: 'none' });
 momNpc.scale.setScalar(1.06);
 momNpc.position.set(MOM_POS.x - sideDir[0] * 0.4, 0, MOM_POS.z - sideDir[1] * 0.4);
 momNpc.rotation.set(0, Math.atan2(HOME_POS.x - momNpc.position.x, HOME_POS.z - momNpc.position.z), 0);
-poseStandingRelaxed(momNpc);
+animateHumanoid(momNpc).then((a) => { if (a?.mixer) a.mixer.stopAllAction(); poseStandingRelaxed(momNpc); }).catch(() => {});
 const momFlag = createVietnamFlag();
 momFlag.position.set(MOM_POS.x - sideDir[0] * 2.5, 0, MOM_POS.z - sideDir[1] * 2.5);
 momFlag.rotation.y = homeLot.facing ?? 0;
@@ -167,14 +167,27 @@ const houseMarkers = TEACHERS.map((t) => {
   pad.visible = false;
 
   const npc = t.isMale ? createSalaryman() : createStudent({ bag: 'none' });
-  if (!t.isMale) npc.scale.setScalar(1.06);
+  if (!t.isMale) {
+    npc.scale.setScalar(t.id === 0 ? 0.98 : 1.06);
+    if (t.id === 0) {
+      // Bà Ngoại: thêm búi tóc bạc trắng & gậy chống cho ra dáng Bà Ngoại!
+      const bun = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }));
+      bun.position.set(0, 1.52, -0.18);
+      const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.95, 6), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      cane.position.set(0.32, 0.48, 0.15);
+      npc.add(bun, cane);
+    }
+  }
   npc.position.set(t.dropX, 0, t.dropZ);
   npc.lookAt(MOM_POS.x, 0, MOM_POS.z);
 
   const flag = createVietnamFlag();
   flag.position.set(t.dropX + 1.4, 0, t.dropZ + 0.8);
   scene.add(beacon, pad, npc, flag);
-  animateHumanoid(npc).then((a) => { if (a) { a.locomotion(0); npcAnims.push(a); } }).catch(() => {});
+  animateHumanoid(npc).then((a) => {
+    if (a?.mixer) a.mixer.stopAllAction();
+    poseStandingRelaxed(npc);
+  }).catch(() => {});
   return { beacon, pad };
 });
 
@@ -647,6 +660,7 @@ function animate(now) {
   if (state.phase !== 'UPGRADE') {
     place.tick(dt);
     npcAnims.forEach((a) => a.update(dt));
+    poseStandingRelaxed(momNpc, Math.sin(now * 0.004) * 0.08);
     look.update();
 
     lions.forEach((l) => {
