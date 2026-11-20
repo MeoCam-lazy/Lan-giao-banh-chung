@@ -38,12 +38,12 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
 #hud { position: fixed; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 18px 24px; z-index: 10; }
 .hud-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .hud-card {
-  background: rgba(24, 14, 20, 0.85);
+  background: rgba(24, 14, 20, 0.88);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(250, 204, 21, 0.35);
-  border-radius: 16px;
+  border: 2px solid rgba(250, 204, 21, 0.55);
+  border-radius: 4px;
   padding: 12px 18px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  box-shadow: 4px 4px 0px rgba(127, 29, 29, 0.9), 0 10px 25px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -98,20 +98,20 @@ body { overflow: hidden; background: #0f172a; font-family: 'Be Vietnam Pro', 'Se
 #minimap { border-radius: 10px; background: #111827; display: block; }
 
 .overlay { position: fixed; inset: 0; background: rgba(15, 10, 14, 0.78); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 20; }
-.modal { width: min(550px, 92vw); background: linear-gradient(160deg, #450a0a, #1e1b2e); border: 2px solid rgba(250, 204, 21, 0.5); border-radius: 24px; padding: 30px; text-align: center; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); }
-.badge { display: inline-block; background: rgba(250, 204, 21, 0.16); color: #facc15; font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 99px; margin-bottom: 14px; }
+.modal { width: min(550px, 92vw); background: linear-gradient(160deg, #450a0a, #1e1b2e); border: 2.5px solid #facc15; border-radius: 4px; padding: 30px; text-align: center; box-shadow: 8px 8px 0px #7f1d1d, 0 25px 50px rgba(0, 0, 0, 0.65); }
+.badge { display: inline-block; background: rgba(250, 204, 21, 0.16); color: #facc15; font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 4px; margin-bottom: 14px; border: 1px solid rgba(250, 204, 21, 0.35); }
 .modal h1, .modal h2 { font-size: 28px; font-weight: 900; margin-bottom: 10px; color: #fffbeb; }
 .subtitle { font-size: 14.5px; line-height: 1.55; color: #fde68a; margin-bottom: 20px; }
-.rules-grid { display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0, 0, 0, 0.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px; font-size: 13.5px; }
-.stats-box { display: flex; flex-direction: column; gap: 10px; background: rgba(0, 0, 0, 0.25); border-radius: 14px; padding: 16px 20px; margin: 18px 0 24px; font-size: 16px; }
+.rules-grid { display: flex; flex-direction: column; gap: 10px; text-align: left; background: rgba(0, 0, 0, 0.25); border-radius: 4px; padding: 14px 18px; margin-bottom: 22px; font-size: 13.5px; }
+.stats-box { display: flex; flex-direction: column; gap: 10px; background: rgba(0, 0, 0, 0.25); border-radius: 4px; padding: 16px 20px; margin: 18px 0 24px; font-size: 16px; border: 1px solid rgba(250, 204, 21, 0.25); }
 .stats-box div { display: flex; justify-content: space-between; }
 .stats-box b { color: #facc15; }
-.btn-primary { width: 100%; padding: 15px 24px; border: none; border-radius: 14px; background: linear-gradient(135deg, #e11d48, #f59e0b); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(225, 29, 72, 0.45); }
+.btn-primary { width: 100%; padding: 15px 24px; border: 2px solid #fde047; border-radius: 4px; background: linear-gradient(135deg, #e11d48, #f59e0b); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 5px 5px 0px #7f1d1d; }
 .credit { margin-top: 12px; font-size: 11px; color: #fca5a5; }
-.upgrade-modal { width: min(660px, 94vw); }
+.upgrade-modal { width: min(680px, 94vw); }
 .upgrade-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
-.upgrade-btn { background: rgba(0, 0, 0, 0.35); border: 2px solid rgba(250, 204, 21, 0.4); border-radius: 16px; padding: 16px 12px; color: #fff; cursor: pointer; transition: transform 0.14s ease, border-color 0.14s ease; }
-.upgrade-btn:hover { transform: translateY(-4px); border-color: #fde047; background: rgba(225, 29, 72, 0.25); }
+.upgrade-btn { background: rgba(0, 0, 0, 0.35); border: 2px solid rgba(250, 204, 21, 0.45); border-radius: 4px; padding: 18px 14px; color: #fff; cursor: pointer; box-shadow: 4px 4px 0px rgba(127, 29, 29, 0.8); transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease; }
+.upgrade-btn:hover { transform: translate(-2px, -2px); border-color: #fde047; background: rgba(225, 29, 72, 0.28); box-shadow: 6px 6px 0px #7f1d1d; }
 .upgrade-btn .u-icon { font-size: 30px; display: block; margin-bottom: 8px; }
 .upgrade-btn .u-title { font-size: 15px; font-weight: 800; color: #facc15; margin-bottom: 6px; }
 .upgrade-btn .u-desc { font-size: 12.5px; color: #fde68a; line-height: 1.4; }

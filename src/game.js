@@ -320,7 +320,19 @@ function openUpgradeMenu() {
       state.perks[u.id] = true;
       state.phase = 'PLAYING';
       upgradeScreen.classList.add('hidden');
-      showToast(`${u.icon} Đã nhận bùa: ${u.title}!`);
+      if (u.id === 'drum') {
+        state.lionBuff = 12;
+        sfx.playLionDrum();
+        spawnEmojis(playerRoot.position.x, playerRoot.position.z, ['🦁', '🥁', '🔥', '🚕']);
+        showToast('🥁 TRỐNG LÂN KÍCH HOẠT! 12s HÚC BAY TAXI NGAY!');
+      } else if (u.id === 'leaf') {
+        state.warmth = 100;
+        showToast('🌿 LÁ DONG GIỮ NHIỆT! Bánh nóng 100% & lâu nguội!');
+      } else {
+        state.boostTimer = 1.2;
+        sfx.playBell();
+        showToast('🪁 CÁNH DIỀU LƯỚT GIÓ! +25% Tốc độ đạp xe!');
+      }
     };
     upgradeCardsEl.appendChild(btn);
   });
